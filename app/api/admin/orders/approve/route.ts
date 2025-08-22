@@ -1,3 +1,4 @@
+// app/api/admin/orders/approve/route.ts
 import 'server-only'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
@@ -36,8 +37,11 @@ export async function POST(req: Request) {
     .single()
 
     if (getErr) {
-      // Si no podemos leer la orden, devolvemos éxito parcial (pagada) y explicamos
-      return NextResponse.json({ ok: true, enrolled: false, note: 'Orden pagada, pero no se pudo leer para matricular.' })
+      return NextResponse.json({
+        ok: true,
+        enrolled: false,
+        note: 'Orden pagada, pero no se pudo leer para matricular.'
+      })
     }
 
     const courseId = ordRow?.course_id
@@ -45,24 +49,34 @@ export async function POST(req: Request) {
     const name = ordRow?.user_name || null
 
     if (!courseId || !email) {
-      // No hay datos suficientes para matricular, pero la orden quedó pagada
-      return NextResponse.json({ ok: true, enrolled: false, note: 'Faltan course_id o user_email, no se pudo matricular.' })
+      return NextResponse.json({
+        ok: true,
+        enrolled: false,
+        note: 'Faltan course_id o user_email, no se pudo matricular.'
+      })
     }
 
-    // 3) UPSERT matrícula para evitar duplicados
-    //    Como definimos unique(course_id, user_email), insertamos y si existe ignoramos.
+    // 3) UPSERT matrícula usando la restricción única (course_id, user_email)
+    //    Requiere que exista el UNIQUE en BD:
+    //    alter table public.enrollments add constraint enrollments_course_email_key unique (course_id, user_email);
     const { error: enErr } = await sb
     .from('enrollments')
-    .insert({
-      order_id: ordRow.id,
-      course_id: courseId,
-      user_email: email,
-      user_name: name
-    }, { ignoreDuplicates: true })
+    .upsert(
+      {
+        order_id: ordRow.id,
+        course_id: courseId,
+        user_email: email,
+        user_name: name
+      },
+      { onConflict: 'course_id,user_email' } // evita duplicados
+    )
 
     if (enErr) {
-      // No bloqueamos la aprobación por un fallo de matrícula, solo informamos
-      return NextResponse.json({ ok: true, enrolled: false, note: `Orden pagada. Error matriculación: ${enErr.message}` })
+      return NextResponse.json({
+        ok: true,
+        enrolled: false,
+        note: `Orden pagada. Error matriculación: ${enErr.message}`
+      })
     }
 
     return NextResponse.json({ ok: true, enrolled: true })
