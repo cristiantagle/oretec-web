@@ -17,25 +17,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             zIndex: 10,
         }}
         >
-        <strong>Panel de Administración – OreTec</strong>
-        <form action="/api/admin/logout" method="post">
-        <button
-        type="submit"
-        style={{
-            background: "#111827",
-            color: "white",
-            borderRadius: 8,
-            padding: "8px 12px",
-            border: "none",
-            cursor: "pointer",
-        }}
-        >
-        Cerrar sesión
-        </button>
-        </form>
-        </header>
-        <main style={{ padding: 16 }}>{children}</main>
-        </body>
-        </html>
+        <strong>Panel Admin — Órdenes</strong>
+        {/* Quitamos el botón aquí para no duplicar.
+            Si lo quieres también arriba, avísame y lo agrego igual que en la página (POST a /api/admin/logout). */}
+            </header>
+            <main style={{ padding: 16 }}>{children}</main>
+            </body>
+            </html>
     );
 }
