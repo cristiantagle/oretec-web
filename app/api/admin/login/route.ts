@@ -1,0 +1,41 @@
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+    return NextResponse.json({ ok: true, method: "GET" });
+}
+
+export async function OPTIONS() {
+    return NextResponse.json({}, { status: 204 });
+}
+
+export async function POST(req: Request) {
+    const { token } = await req.json().catch(() => ({ token: "" }));
+    const expected = process.env.ADMIN_TOKEN;
+
+    if (!expected) {
+        return NextResponse.json(
+            { ok: false, error: "ADMIN_TOKEN no configurado en el servidor" },
+            { status: 500 }
+        );
+    }
+
+    if (token !== expected) {
+        return NextResponse.json(
+            { ok: false, error: "Token inválido" },
+            { status: 401 }
+        );
+    }
+
+    const res = NextResponse.json({ ok: true });
+    res.cookies.set("admin_auth", "1", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 8, // 8 horas
+    });
+
+    return res;
+}
