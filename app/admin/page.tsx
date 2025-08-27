@@ -78,7 +78,7 @@ export default function AdminPage() {
     Gestionar cursos
     </Link>
 
-    {/* Logout por POST -> /api/admin/logout (redirige al home "/") */}
+    {/* Logout UNIFICADO: POST → /api/admin/logout */}
     <form action="/api/admin/logout" method="post">
     <button
     type="submit"

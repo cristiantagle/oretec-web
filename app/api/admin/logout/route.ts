@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+
 export const dynamic = "force-dynamic";
 
+/** POST-Redirect-GET con 303 para evitar 405 en "/" */
 export async function POST(req: Request) {
-    const res = NextResponse.redirect(new URL("/", req.url));
+    const res = NextResponse.redirect(new URL("/", req.url), 303); // 303 See Other
     res.cookies.set("admin_auth", "", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -12,4 +14,8 @@ export async function POST(req: Request) {
     });
     return res;
 }
-export async function GET(req: Request) { return POST(req); }
+
+/** Permite también GET (por si hay enlaces) */
+export async function GET(req: Request) {
+    return POST(req);
+}
