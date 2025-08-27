@@ -1,4 +1,5 @@
 import './globals.css'
+import HomeButton from '@/components/HomeButton'
 
 export const metadata = {
   title: 'OreTec',
@@ -8,7 +9,11 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body>{children}</body>
+    <body>
+    {children}
+    {/* Botón global (no se muestra en "/") */}
+    <HomeButton />
+    </body>
     </html>
   )
 }
