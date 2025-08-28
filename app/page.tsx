@@ -1,4 +1,6 @@
 import Link from "next/link";
+import FadeIn from "@/components/FadeIn";
+import { ShieldCheck, GraduationCap, Clock, BadgeCheck } from "lucide-react";
 
 export default function Home() {
   return (
@@ -24,12 +26,16 @@ export default function Home() {
     />
 
     <div className="mx-auto max-w-6xl px-4 py-16 lg:py-24">
-    <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
-    <div className="max-w-2xl">
+    <div className="grid items-center gap-10 md:grid-cols-2">
+    <FadeIn>
+    <div>
     <span className="inline-block rounded-full border border-slate-200 bg-white/60 px-3 py-1 text-xs font-medium text-slate-700 backdrop-blur">
     Formación 100% online · Chile
     </span>
-    <h1 className="mt-4 text-4xl font-bold leading-tight text-slate-900 md:text-5xl">
+    <h1
+    className="mt-4 text-4xl font-bold leading-tight text-slate-900 md:text-5xl"
+    style={{ fontFamily: 'var(--font-display)' }}
+    >
     Capacitación en <span className="text-[#1E3A8A]">Prevención y Seguridad Laboral</span>
     </h1>
     <p className="mt-4 text-slate-600 md:text-lg">
@@ -57,60 +63,64 @@ export default function Home() {
     </Link>
     </div>
     </div>
+    </FadeIn>
 
-    {/* Tarjeta destacada */}
-    <div className="mt-10 w-full max-w-sm md:mt-0">
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <div className="bg-gradient-to-r from-[#1E3A8A] to-[#1E3A8A]/70 px-5 py-4 text-white">
-    <p className="text-sm/5 font-semibold">Novedad</p>
-    <p className="text-sm/5 opacity-90">Plan e-learning empresas</p>
+    {/* Panel visual (sin imagen externa para evitar dependencias) */}
+    <FadeIn delay={0.1}>
+    <div className="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur">
+    <div className="grid gap-4 sm:grid-cols-2">
+    {[
+      { icon: ShieldCheck, t: "Seguridad y PRL", d: "Contenidos orientados a normativa y buenas prácticas." },
+      { icon: GraduationCap, t: "Certificación", d: "Constancias descargables y verificables." },
+      { icon: Clock, t: "Flexible", d: "Avanza a tu ritmo, 100% online." },
+      { icon: BadgeCheck, t: "Calidad", d: "Material actualizado y soporte cercano." },
+    ].map(({ icon: Icon, t, d }) => (
+      <div key={t} className="flex gap-3 rounded-2xl border border-slate-200 bg-white/70 p-4">
+      <div className="mt-0.5 rounded-xl bg-[#1E3A8A]/10 p-2">
+      <Icon className="h-5 w-5 text-[#1E3A8A]" />
+      </div>
+      <div>
+      <div className="text-sm font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{t}</div>
+      <div className="text-sm text-slate-600">{d}</div>
+      </div>
+      </div>
+    ))}
     </div>
-    <div className="px-5 py-5">
-    <ul className="grid gap-2 text-sm text-slate-700">
-    <li>• Biblioteca de cursos priorizados PRL</li>
-    <li>• Seguimiento y reportes</li>
-    <li>• Certificados descargables</li>
-    </ul>
-    <Link
-    href="/courses"
-    className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:opacity-95"
-    >
-    Explorar catálogo
-    </Link>
     </div>
-    </div>
-    </div>
+    </FadeIn>
     </div>
 
     {/* logos/confianza (placeholder) */}
+    <FadeIn delay={0.2}>
     <div className="mt-12 grid grid-cols-2 items-center gap-6 opacity-70 sm:grid-cols-4">
     <div className="h-8 rounded bg-slate-100" />
     <div className="h-8 rounded bg-slate-100" />
     <div className="h-8 rounded bg-slate-100" />
     <div className="h-8 rounded bg-slate-100" />
     </div>
+    </FadeIn>
     </div>
     </section>
 
     {/* BENEFICIOS */}
     <section className="mx-auto max-w-6xl px-4 py-14">
-    <h2 className="text-2xl font-semibold text-slate-900">¿Por qué OreTec?</h2>
+    <FadeIn>
+    <h2 className="text-2xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>
+    ¿Por qué OreTec?
+    </h2>
+    </FadeIn>
     <div className="mt-6 grid gap-4 md:grid-cols-3">
     {[
-      {
-        t: "100% Online",
-        d: "Cursos e-learning diseñados para Chile: flexibles y accesibles.",
-      },
+      { t: "100% Online", d: "Cursos e-learning diseñados para Chile: flexibles y accesibles." },
       { t: "Certificación", d: "Constancias descargables y verificables." },
       { t: "Actualización", d: "Contenidos al día en prevención y seguridad." },
-    ].map((i) => (
-      <div
-      key={i.t}
-      className="rounded-2xl border border-slate-200 bg-white/60 p-5 backdrop-blur-sm"
-      >
-      <div className="text-base font-semibold text-slate-900">{i.t}</div>
+    ].map((i, idx) => (
+      <FadeIn key={i.t} delay={0.05 * (idx + 1)}>
+      <div className="rounded-2xl border border-slate-200 bg-white/60 p-5 backdrop-blur-sm">
+      <div className="text-base font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>{i.t}</div>
       <div className="mt-1 text-sm text-slate-600">{i.d}</div>
       </div>
+      </FadeIn>
     ))}
     </div>
     </section>
@@ -125,8 +135,9 @@ export default function Home() {
     }}
     />
     <div className="mx-auto max-w-6xl px-4 py-14">
+    <FadeIn>
     <div className="rounded-3xl border border-slate-200 bg-white px-6 py-8 text-center shadow-sm md:px-10 md:py-12">
-    <h3 className="text-xl font-semibold text-slate-900">
+    <h3 className="text-xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>
     ¿Necesitas capacitar a tu equipo?
     </h3>
     <p className="mt-2 text-slate-600">
@@ -147,6 +158,7 @@ export default function Home() {
     </Link>
     </div>
     </div>
+    </FadeIn>
     </div>
     </section>
     </main>

@@ -1,25 +1,26 @@
-import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-function supabaseAdmin() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-    if (!url || !key) throw new Error('Faltan envs de Supabase')
-        return createClient(url, key)
-}
+import { cookies } from 'next/headers'
+import { supabaseServer } from '@/lib/supabase/server'
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        const sb = supabaseAdmin()
-        const { data, error } = await sb
-        .from('courses')
-        .select('id, code, slug, title, description, price_cents, hours, level, mp_link, published')
-        .order('code', { ascending: true })
+        const admin = cookies().get('admin_auth')?.value === '1'
+        if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-        if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-            return NextResponse.json(data ?? [])
+            const supabase = supabaseServer()
+            const { data, error } = await supabase
+            .from('courses')
+            .select('id, code, slug, title, description, price_cents, hours, level, mp_link, published')
+            .order('title', { ascending: true })
+
+            if (error) return NextResponse.json({ error: 'DB error' }, { status: 500 })
+
+                return new NextResponse(JSON.stringify(data ?? []), {
+                    status: 200,
+                    headers: { 'Cache-Control': 'no-store', 'Content-Type': 'application/json' },
+                })
     } catch (e: any) {
-        return NextResponse.json({ error: e?.message ?? 'Unknown server error' }, { status: 500 })
+        return NextResponse.json({ error: e?.message || 'Internal error' }, { status: 500 })
     }
 }

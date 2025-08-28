@@ -1,83 +1,151 @@
-// app/courses/page.tsx
-import { supabaseServer } from '@/lib/supabase/server'
+'use client'
 
-export const revalidate = 0 // siempre fresco
+import { useEffect, useState } from 'react'
+import CourseCard from '@/components/CourseCard'
+import FadeIn from '@/components/FadeIn'
 
-function clp(n: number) {
-  return (n || 0).toLocaleString('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    maximumFractionDigits: 0,
-  })
-}
+type APICourse = Record<string, any>
 
-export default async function CoursesPage() {
-  const supabase = supabaseServer()
+export default function CoursesPage() {
+  const [courses, setCourses] = useState<APICourse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [nonce, setNonce] = useState(0) // para forzar recargas
 
-  const { data: courses, error } = await supabase
-  .from('courses')
-  .select('id, code, slug, title, description, price_cents, hours, level, mp_link, published')
-  .eq('published', true)
-  .order('code', { ascending: true })
-
-  if (error) {
-    return (
-      <main className="max-w-5xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: '#1E3A8A' }}>
-      Catálogo de cursos
-      </h1>
-      <div className="rounded-xl border bg-red-50 text-red-700 p-4">
-      <div className="font-semibold">Error cargando cursos</div>
-      <pre className="text-xs mt-2 whitespace-pre-wrap">{JSON.stringify(error, null, 2)}</pre>
-      </div>
-      </main>
-    )
+  async function load() {
+    setLoading(true)
+    setError(null)
+    try {
+      // cache-buster para evitar cualquier caché intermedia
+      const ts = Date.now()
+      const r = await fetch(`/api/public/courses?ts=${ts}&n=${nonce}`, { cache: 'no-store' })
+      if (!r.ok) throw new Error(await r.text().catch(() => `HTTP ${r.status}`))
+        const data = await r.json()
+        if (!Array.isArray(data)) throw new Error('Respuesta del API no es un arreglo')
+          setCourses(data)
+    } catch (e: any) {
+      setError(e?.message ?? 'No se pudieron cargar los cursos')
+      setCourses([])
+    } finally {
+      setLoading(false)
+    }
   }
 
+  useEffect(() => { load() }, [nonce])
+
+  // helpers
+  const toInt = (v: any): number | null => {
+    if (v == null) return null
+      if (typeof v === 'number' && Number.isFinite(v)) return Math.round(v)
+        if (typeof v === 'string') {
+          const digits = v.replace(/[^\d]/g, '')
+          if (!digits) return null
+            const n = parseInt(digits, 10)
+            return Number.isFinite(n) ? n : null
+        }
+        return null
+  }
+  const toHours = (v: any): number | null => {
+    if (v == null) return null
+      if (typeof v === 'number' && Number.isFinite(v)) return Math.round(v)
+        if (typeof v === 'string') {
+          const m = v.match(/(\d{1,3})/); if (m) return parseInt(m[1], 10)
+        }
+        return null
+  }
+  const firstOf = (obj: any, keys: string[]): any => {
+    for (const k of keys) {
+      if (!obj) continue
+        if (k.includes('.')) {
+          const val = k.split('.').reduce((acc: any, part) => (acc ? acc[part] : undefined), obj)
+          if (val != null) return val
+        } else if (k in obj && obj[k] != null) {
+          return obj[k]
+        }
+    }
+    return null
+  }
+  const courseTitle = (c: APICourse): string =>
+  (firstOf(c, ['title','course_title','name','titulo','nombre']) as string) ?? 'Curso'
+  const courseCode = (c: APICourse): string | null =>
+  (firstOf(c, ['code','course_code','sku','codigo','código','slug']) as string) ?? null
+  const courseDesc = (c: APICourse): string | null =>
+  (firstOf(c, ['description','summary','desc','descripcion','descripción','resumen']) as string) ?? null
+  const priceCLP = (c: APICourse): number | null => {
+    // En tu backend guardas PESOS en price_cents ⇒ úsalo directo.
+    const centsLikePesos = firstOf(c, ['price_cents', 'price_clp', 'price'])
+    return toInt(centsLikePesos)
+  }
+  const hours = (c: APICourse): number | null =>
+  toHours(firstOf(c, ['hours','horas','duration','duracion','duración','duration_hours','hrs','meta.hours']))
+  const buyLink = (c: APICourse): string | null =>
+  (firstOf(c, ['mp_link','mercado_pago_url','mp_url','payment_link','checkout_url','buy_url','url','links.buy','links.checkout']) as string) ?? null
+
   return (
-    <main className="max-w-5xl mx-auto px-4 py-10">
-    <h1 className="text-2xl font-bold mb-6" style={{ color: '#1E3A8A' }}>
+    <main className="mx-auto max-w-6xl px-4 py-10">
+    <div className="flex items-center justify-between">
+    <div>
+    <FadeIn>
+    <h1 className="text-2xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>
     Catálogo de cursos
     </h1>
+    <p className="mt-1 text-slate-600">
+    Formación e-learning en prevención y seguridad laboral — Chile.
+    </p>
+    </FadeIn>
+    </div>
+    <button
+    onClick={() => { setNonce(n => n + 1); load() }} // fuerza recarga inmediata
+    className="rounded-xl border px-3 py-2 text-sm"
+    style={{ borderColor: '#1E3A8A', color: '#1E3A8A' }}
+    title="Forzar recarga (sin caché)"
+    >
+    ↻ Actualizar
+    </button>
+    </div>
 
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-    {courses?.map((c) => (
-      <div key={c.id} className="rounded-2xl border p-5">
-      <div className="text-sm text-gray-500 mb-1">
-      {c.code} · {c.level}
+    {loading ? (
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-5">
+        <div className="h-3 w-16 animate-pulse rounded bg-slate-100" />
+        <div className="mt-2 h-6 w-3/4 animate-pulse rounded bg-slate-100" />
+        <div className="mt-3 flex gap-3">
+        <div className="h-4 w-24 animate-pulse rounded bg-slate-100" />
+        <div className="h-4 w-24 animate-pulse rounded bg-slate-100" />
+        </div>
+        <div className="mt-4 h-9 w-32 animate-pulse rounded bg-slate-200" />
+        </div>
+      ))}
       </div>
-      <h3 className="font-semibold">{c.title}</h3>
-      <p className="text-sm text-gray-600 mt-2">{c.description}</p>
-
-      <div className="flex items-center justify-between mt-4">
-      <div className="text-xl font-extrabold" style={{ color: '#1E3A8A' }}>
-      {clp(c.price_cents ?? 0)}
+    ) : error ? (
+      <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      {error}
       </div>
-
-      <a
-      href={c.mp_link ?? '#'}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-white"
-      style={{
-        background: '#1E3A8A',
-        opacity: c.mp_link ? 1 : 0.4,
-        pointerEvents: c.mp_link ? 'auto' : 'none',
-      }}
-      >
-      Comprar
-      </a>
-      </div>
-
-      <div className="text-xs text-gray-500 mt-2">{c.hours} horas</div>
-      </div>
-    ))}
-    {!courses?.length && (
-      <div className="col-span-full rounded-xl border p-6 text-center text-gray-600">
-      Aún no hay cursos publicados.
+    ) : (
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {courses.map((c) => (
+        <FadeIn
+        key={(c.id as string) || (c.slug as string) || (c.code as string) || courseTitle(c)} // keys estables, sin índice
+        delay={0.03}
+        >
+        <CourseCard
+        title={courseTitle(c)}
+        code={courseCode(c)}
+        hours={hours(c)}
+        priceCLP={priceCLP(c)}
+        href={buyLink(c)}      // puede ser null; el card lo maneja
+        description={courseDesc(c)}
+        />
+        </FadeIn>
+      ))}
+      {courses.length === 0 && (
+        <div className="col-span-full rounded-2xl border border-slate-200 bg-white p-6 text-center text-slate-600">
+        No hay cursos disponibles por el momento.
+        </div>
+      )}
       </div>
     )}
-    </div>
     </main>
   )
 }
