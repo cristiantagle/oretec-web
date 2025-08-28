@@ -1,10 +1,38 @@
+import Image from 'next/image'
+import Link from 'next/link'
+
 export default function Footer() {
     return (
-        <footer className="border-t bg-white/70">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-sm text-slate-600 md:flex-row md:items-center md:justify-between">
-        <p>© {new Date().getFullYear()} OreTec. Todos los derechos reservados.</p>
-        <p className="opacity-80">Formación en Prevención y Seguridad Laboral — e-learning Chile</p>
+        <footer className="mt-16 border-t bg-white">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-3">
+        <div className="flex items-center gap-3">
+        <Image
+        src="/images/logo-oretec.png"
+        alt="OreTec"
+        width={28}
+        height={28}
+        className="rounded-md"
+        />
+        <span className="font-semibold" style={{color:'#1E3A8A'}}>ORETEC</span>
+        </div>
+
+        <div className="text-sm text-slate-600">
+        <div className="font-medium text-slate-900">Formación e-learning</div>
+        <p className="mt-1">Prevención y Seguridad Laboral — Chile.</p>
+        </div>
+
+        <div className="text-sm text-slate-600">
+        <div className="font-medium text-slate-900">Enlaces</div>
+        <ul className="mt-1 space-y-1">
+        <li><Link href="/courses" className="hover:underline">Cursos</Link></li>
+        <li><a href="mailto:contacto@oretec.cl" className="hover:underline">contacto@oretec.cl</a></li>
+        <li><Link href="/admin" className="hover:underline">Admin</Link></li>
+        </ul>
+        </div>
+        </div>
+        <div className="border-t py-4 text-center text-xs text-slate-500">
+        © {new Date().getFullYear()} OreTec. Todos los derechos reservados.
         </div>
         </footer>
-    );
+    )
 }
