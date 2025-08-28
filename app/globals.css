@@ -7,3 +7,7 @@
   --gray-dark: #374151;
   --gray-light: #E5E7EB;
 }
+/* Fondo degradé corporativo suave */
+.bg-oret-gradient {
+  background: linear-gradient(180deg, #F8FAFF 0%, #EEF3FF 40%, #FFFFFF 100%);
+}
