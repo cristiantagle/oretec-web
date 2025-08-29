@@ -1,13 +1,12 @@
 'use client'
 import Link from 'next/link'
-import FadeIn from '@/components/FadeIn'
 
 export default function CTASection() {
     return (
-        <FadeIn>
         <div
         id="contacto"
-        className="card p-8 text-center shadow-sm transition hover:shadow-md hover:scale-[1.02]"
+        className="card shadow-soft p-8 text-center transform transition
+        hover:shadow-md hover:-translate-y-0.5"
         >
         <h3 className="text-xl font-semibold text-slate-900">
         ¿Necesitas cotizar para tu empresa?
@@ -15,7 +14,7 @@ export default function CTASection() {
         <p className="mt-2 text-slate-600">
         Diseñamos planes de formación para cumplir con normativa y metas internas.
         </p>
-        <div className="mt-4 flex justify-center gap-3">
+        <div className="mt-5 flex justify-center gap-3">
         <Link href="/courses" className="btn-primary">
         Ver catálogo
         </Link>
@@ -24,6 +23,5 @@ export default function CTASection() {
         </a>
         </div>
         </div>
-        </FadeIn>
     )
 }

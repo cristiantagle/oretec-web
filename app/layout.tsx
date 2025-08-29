@@ -2,6 +2,7 @@ import './globals.css'
 import type { ReactNode } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import ScrollTop from '@/components/ScrollTop'
 import { Inter, Poppins } from 'next/font/google'
 
 const inter = Inter({
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <Navbar />
     <main>{children}</main>
     <Footer />
+    <ScrollTop />
     </body>
     </html>
   )

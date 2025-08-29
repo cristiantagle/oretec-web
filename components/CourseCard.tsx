@@ -26,7 +26,7 @@ export default function CourseCard({
     })
 
     return (
-        <article className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:shadow-md">
+        <article className="group card card-hover p-5">
         {/* Código + título */}
         <header>
         {code && (
@@ -42,7 +42,7 @@ export default function CourseCard({
         )}
         </header>
 
-        {/* Chips bonitas (horas y precio) */}
+        {/* Chips (horas y precio) */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
         {typeof hours === 'number' && hours > 0 && (
             <span className="chip">⏱ {hours} h</span>
@@ -52,19 +52,19 @@ export default function CourseCard({
         )}
         </div>
 
-        {/* Botón con hover moderno, manteniendo azul corporativo */}
+        {/* Botón con hover corporativo */}
         <div className="mt-auto pt-5">
         {href ? (
             <Link
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary"
+            className="btn-primary w-full"
             >
             Comprar ahora
             </Link>
         ) : (
-            <span className="block rounded-xl bg-gray-200 px-4 py-2 text-center text-sm text-gray-600">
+            <span className="btn-secondary w-full cursor-not-allowed opacity-60">
             Próximamente
             </span>
         )}

@@ -32,9 +32,21 @@ export default function Footer() {
         <div className="text-sm text-slate-600">
         <div className="font-medium text-slate-900">Enlaces</div>
         <ul className="mt-2 space-y-1">
-        <li><Link href="/courses" className="hover:underline">Cursos</Link></li>
-        <li><Link href="/#contacto" className="hover:underline">Contacto</Link></li>
-        <li><Link href="/admin" className="hover:underline">Admin</Link></li>
+        <li>
+        <Link href="/courses" className="link-anim">
+        Cursos
+        </Link>
+        </li>
+        <li>
+        <Link href="/#contacto" className="link-anim">
+        Contacto
+        </Link>
+        </li>
+        <li>
+        <Link href="/admin" className="link-anim">
+        Admin
+        </Link>
+        </li>
         </ul>
         </div>
         </FadeIn>
@@ -45,7 +57,7 @@ export default function Footer() {
         <div className="font-medium text-slate-900">Contacto</div>
         <ul className="mt-2 space-y-1">
         <li>
-        <a href="mailto:contacto@oretec.cl" className="hover:underline">
+        <a href="mailto:contacto@oretec.cl" className="link-anim">
         contacto@oretec.cl
         </a>
         </li>
