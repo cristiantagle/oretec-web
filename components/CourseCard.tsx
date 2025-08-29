@@ -26,17 +26,23 @@ export default function CourseCard({
     })
 
     return (
-        <article className="group rounded-2xl border border-slate-200 bg-white p-5 transition duration-150 hover:shadow-soft">
+        <article className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:shadow-md">
+        {/* Código + título */}
         <header>
         {code && (
-            <div className="mb-2 text-[11px] uppercase tracking-wide text-slate-500">{code}</div>
+            <div className="mb-2 text-[11px] uppercase tracking-wide text-slate-500">
+            {code}
+            </div>
         )}
         <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
         {description && (
-            <p className="mt-1 line-clamp-3 text-sm text-slate-600">{description}</p>
+            <p className="mt-1 line-clamp-3 text-sm text-slate-600">
+            {description}
+            </p>
         )}
         </header>
 
+        {/* Chips bonitas (horas y precio) */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
         {typeof hours === 'number' && hours > 0 && (
             <span className="chip">⏱ {hours} h</span>
@@ -46,21 +52,23 @@ export default function CourseCard({
         )}
         </div>
 
-        <footer className="mt-5">
+        {/* Botón con hover moderno, manteniendo azul corporativo */}
+        <div className="mt-auto pt-5">
         {href ? (
-            <a
+            <Link
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center rounded-xl px-4 py-2 text-white transition"
-            style={{ background: '#1E3A8A' }}  // ← fuerza azul corporativo
+            className="btn-primary"
             >
             Comprar ahora
-            </a>
+            </Link>
         ) : (
-            <span className="text-sm text-slate-500">Próximamente</span>
+            <span className="block rounded-xl bg-gray-200 px-4 py-2 text-center text-sm text-gray-600">
+            Próximamente
+            </span>
         )}
-        </footer>
+        </div>
         </article>
     )
 }

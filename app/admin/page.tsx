@@ -64,27 +64,19 @@ export default function AdminPage() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-10">
-    <div className="flex items-center justify-between mb-6">
-    <h1 className="text-2xl font-bold" style={{color:'#1E3A8A'}}>
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <h1 className="text-2xl font-bold" style={{ color: '#1E3A8A' }}>
     Panel Admin — Órdenes
     </h1>
 
     <div className="flex items-center gap-3">
-    <Link
-    href="/admin/courses"
-    className="px-4 py-2 rounded-xl text-white"
-    style={{ background:'#1E3A8A' }}
-    >
+    <Link href="/admin/courses" className="btn-primary">
     Gestionar cursos
     </Link>
 
-    {/* Logout UNIFICADO: POST → /api/admin/logout */}
+    {/* Logout por POST a /api/admin/logout */}
     <form action="/api/admin/logout" method="post">
-    <button
-    type="submit"
-    className="px-3 py-2 rounded-xl border"
-    style={{ borderColor:'#1E3A8A', color:'#1E3A8A' }}
-    >
+    <button type="submit" className="btn-secondary">
     Cerrar sesión
     </button>
     </form>
@@ -146,15 +138,13 @@ export default function AdminPage() {
           <>
           <button
           onClick={() => approve(r.order_id)}
-          className="px-3 py-1 rounded text-white"
-          style={{ background: '#1E3A8A' }}
+          className="btn-primary inline-flex"
           >
           Aprobar
           </button>
           <button
           onClick={() => reject(r.order_id)}
-          className="px-3 py-1 rounded border"
-          style={{ borderColor:'#1E3A8A', color:'#1E3A8A' }}
+          className="btn-secondary inline-flex"
           >
           Rechazar
           </button>
@@ -165,7 +155,7 @@ export default function AdminPage() {
       ))}
       {!rows.length && (
         <tr>
-        <td colSpan={7} className="text-center text-gray-500 py-8">
+        <td colSpan={7} className="py-8 text-center text-gray-500">
         No hay órdenes aún.
         </td>
         </tr>
