@@ -1,23 +1,10 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
 
 export default function HeroElearn() {
-    const [hover, setHover] = useState(false)
     return (
-        <header className="relative overflow-hidden">
-        {/* fondo con degradés */}
-        <div className="absolute inset-0 -z-10 bg-oret-gradient" />
-        <div
-        className="absolute -top-24 -right-24 h-[420px] w-[420px] rounded-full blur-3xl opacity-20"
-        style={{ background: 'radial-gradient(600px 200px at 50% 50%, #2563EB22, transparent)' }}
-        />
-        <div
-        className="absolute -bottom-24 -left-24 h-[420px] w-[420px] rounded-full blur-3xl opacity-20"
-        style={{ background: 'radial-gradient(600px 200px at 50% 50%, #1E3A8A22, transparent)' }}
-        />
-
+        <header className="relative bg-white">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-20">
         <div>
         <h1
@@ -27,51 +14,48 @@ export default function HeroElearn() {
         Capacitación <span className="text-[#1E3A8A]">e-learning</span> en
         <br />prevención y seguridad laboral
         </h1>
-        <p className="mt-4 max-w-xl text-slate-700">
+
+        <p className="mt-4 max-w-xl text-slate-800">
         Cursos online, prácticos y actualizados. Certifícate desde cualquier lugar y avanza en tu cumplimiento normativo.
         </p>
+
         <div className="mt-6 flex flex-wrap gap-3">
-        <Link
-        href="/courses"
-        className="rounded-xl px-5 py-3 text-white transition"
-        style={{ background: '#1E3A8A' }}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-        >
+        <Link href="/courses" className="rounded-xl px-5 py-3 text-white" style={{ background: '#1E3A8A' }}>
         Ver catálogo de cursos
         </Link>
-        <Link
-        href="#contacto"
-        className="rounded-xl border px-5 py-3 text-[#1E3A8A]"
-        style={{ borderColor: '#1E3A8A' }}
-        >
+        <Link href="#contacto" className="rounded-xl border px-5 py-3 text-[#1E3A8A]" style={{ borderColor: '#1E3A8A' }}>
         Asesoría para empresas
         </Link>
         </div>
 
-        <ul className="mt-6 flex flex-wrap gap-4 text-sm text-slate-600">
+        <ul className="mt-6 flex flex-wrap gap-4 text-sm text-slate-700">
         <li>• 100% online</li>
         <li>• Certificación digital</li>
         <li>• Enfoque Chile</li>
         </ul>
         </div>
 
+        {/* Contenedor de imagen con capas controladas */}
         <div className="relative h-[280px] w-full md:h-[340px]">
-        <div className="absolute inset-0 rounded-3xl bg-white/70 shadow-lg backdrop-blur">
+        {/* Imagen principal (cache-bust v=2) */}
+        <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl shadow-soft">
         <Image
-        src="/images/hero-elearning.png"
+        src="/images/hero-elearning.png?v=2"
         alt="Capacitación e-learning"
         fill
         priority
-        className="rounded-3xl object-cover"
+        sizes="(min-width: 768px) 520px, 100vw"
+        className="rounded-3xl object-cover object-center"
         />
         </div>
-        {/* plaquitas */}
-        <div className="absolute -bottom-4 -left-4 rounded-2xl border bg-white px-4 py-3 text-sm shadow-md">
+
+        {/* Chips arriba de la imagen */}
+        <div className="card absolute -bottom-4 -left-4 z-10 px-4 py-3 text-sm">
         <div className="font-medium text-slate-800">Cursos activos</div>
         <div className="text-slate-600">Catálogo actualizado — CLP</div>
         </div>
-        <div className="absolute -top-4 -right-4 rounded-2xl border bg-white px-4 py-3 text-sm shadow-md">
+
+        <div className="card absolute -top-4 -right-4 z-10 px-4 py-3 text-sm">
         <div className="font-medium text-slate-800">Certificación</div>
         <div className="text-slate-600">Descarga inmediata</div>
         </div>
