@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import FadeIn from '@/components/FadeIn'
 
 const links = [
     { href: '/', label: 'Inicio' },
@@ -18,20 +19,24 @@ export default function Navbar() {
         <nav className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo + nombre */}
+        <FadeIn y={8}>
         <Link href="/" className="flex items-center gap-3" prefetch={false}>
         <img
-        src="/images/logo-oretec.png?v=1"
+        src="/images/logo-oretec.png?v=2"
         alt="OreTec"
-        className="w-12 h-12 md:w-16 md:h-16"
-        style={{ display: 'block' }}
+        width={44}
+        height={44}
+        style={{ display: 'block', borderRadius: 8 }}
         loading="eager"
         />
         <span className="text-lg font-semibold tracking-wide" style={{ color: '#1E3A8A' }}>
         ORETEC
         </span>
         </Link>
+        </FadeIn>
 
         {/* Desktop links + Admin */}
+        <FadeIn delay={0.05} y={8}>
         <div className="hidden items-center gap-6 md:flex">
         {links.map((l) => (
             <Link
@@ -51,6 +56,7 @@ export default function Navbar() {
         Admin
         </Link>
         </div>
+        </FadeIn>
 
         {/* Mobile button */}
         <button
@@ -66,10 +72,11 @@ export default function Navbar() {
         {/* Mobile menu */}
         {open && (
             <div className="border-t bg-white md:hidden">
+            <FadeIn y={6}>
             <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3">
-            {links.map((l) => (
+            {links.map((l, i) => (
+                <FadeIn key={l.href} delay={0.03 * (i + 1)} y={6}>
                 <Link
-                key={l.href}
                 href={l.href}
                 prefetch={false}
                 className={`py-2 text-sm ${
@@ -79,9 +86,11 @@ export default function Navbar() {
                 >
                 {l.label}
                 </Link>
+                </FadeIn>
             ))}
 
             {/* Admin como botón en móvil */}
+            <FadeIn delay={0.12} y={6}>
             <Link
             href="/admin"
             prefetch={false}
@@ -90,7 +99,9 @@ export default function Navbar() {
             >
             Admin
             </Link>
+            </FadeIn>
             </div>
+            </FadeIn>
             </div>
         )}
         </nav>

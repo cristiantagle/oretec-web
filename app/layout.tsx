@@ -2,6 +2,20 @@ import './globals.css'
 import type { ReactNode } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { Inter, Poppins } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+})
 
 export const metadata = {
   title: 'OreTec',
@@ -10,8 +24,8 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
-    <body className="bg-white text-slate-900">
+    <html lang="es" className={`${inter.variable} ${poppins.variable}`}>
+    <body className="bg-white text-slate-900 font-sans">
     <Navbar />
     <main>{children}</main>
     <Footer />

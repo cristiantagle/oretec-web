@@ -1,5 +1,6 @@
 'use client'
 import Image from 'next/image'
+import FadeIn from '@/components/FadeIn'
 
 const items = [
     {
@@ -28,18 +29,24 @@ export default function FeatureCards() {
     return (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((it, i) => (
-            <div
-            key={i}
-            className="rounded-2xl border bg-white p-6 shadow-sm transition hover:shadow-md"
-            >
+            <FadeIn key={it.title} delay={i * 0.06}>
+            <div className="card group rounded-2xl p-6 shadow-sm transition hover:shadow-md hover:scale-[1.02]">
             <div className="mb-4 flex items-center gap-4">
-            <div className="relative h-16 w-16"> {/* íconos más grandes */}
-            <Image src={it.img} alt="" fill className="object-contain" />
+            <div className="relative h-18 w-18 sm:h-16 sm:w-16">
+            <Image
+            src={it.img}
+            alt=""
+            fill
+            className="object-contain"
+            sizes="64px"
+            priority={i < 2}
+            />
             </div>
             <h3 className="text-lg font-semibold text-slate-900">{it.title}</h3>
             </div>
             <p className="text-slate-600">{it.desc}</p>
             </div>
+            </FadeIn>
         ))}
         </div>
     )

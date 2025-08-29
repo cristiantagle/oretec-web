@@ -6,6 +6,15 @@
   --brand: #1E3A8A;
   --gray-dark: #374151;
   --gray-light: #E5E7EB;
+
+  /* Variables de tipografía (inyectadas desde next/font en layout) */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-display: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Usa Inter como fuente base y Poppins para títulos a través de var() */
+body {
+  font-family: var(--font-sans);
 }
 
 /* Fondo degradé corporativo suave (úsa .bg-oret-gradient donde quieras) */
@@ -19,6 +28,11 @@
 }
 .shadow-soft {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+/* Card con hover consistente (para aplicar donde quieras) */
+.card-hover {
+  @apply transition duration-300 ease-in-out hover:shadow-md hover:-translate-y-0.5;
 }
 
 /* =======================================================
@@ -70,9 +84,12 @@
   .btn,
   .btn-primary,
   .btn-secondary,
-  .btn-danger {
+  .btn-danger,
+  .fade-in {
     transition: none !important;
+    animation: none !important;
     transform: none !important;
+    opacity: 1 !important;
   }
 }
 
@@ -81,4 +98,27 @@
   @apply inline-flex items-center gap-1.5
   rounded-full border border-slate-200 bg-white
   px-2.5 py-1 text-xs font-medium text-slate-700;
+}
+
+/* =======================================================
+ *  Animación FadeIn (para el componente components/FadeIn.tsx)
+ *  ======================================================= */
+.fade-in {
+  opacity: 0;
+  transform: translateY(var(--fi-translate, 8px));
+  transition:
+  opacity 500ms ease-out var(--fi-delay, 0s),
+  transform 500ms ease-out var(--fi-delay, 0s);
+}
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Títulos que usen la fuente display (opcional) */
+.section-title,
+h1.section-title,
+h2.section-title,
+h3.section-title {
+  font-family: var(--font-display);
 }
