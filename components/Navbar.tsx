@@ -8,7 +8,6 @@ const links = [
     { href: '/', label: 'Inicio' },
 { href: '/courses', label: 'Cursos' },
 { href: '/#contacto', label: 'Contacto' },
-{ href: '/admin', label: 'Admin' },
 ]
 
 export default function Navbar() {
@@ -21,11 +20,10 @@ export default function Navbar() {
         {/* Logo + nombre */}
         <Link href="/" className="flex items-center gap-3" prefetch={false}>
         <img
-        src="/images/logo-oretec.png?v=1"  // <-- PNG directo; si subes SVG, cambia a .svg
+        src="/images/logo-oretec.png?v=1"
         alt="OreTec"
-        width={36}
-        height={36}
-        style={{ display: 'block', borderRadius: 6 }}
+        className="w-12 h-12 md:w-16 md:h-16"
+        style={{ display: 'block' }}
         loading="eager"
         />
         <span className="text-lg font-semibold tracking-wide" style={{ color: '#1E3A8A' }}>
@@ -33,20 +31,25 @@ export default function Navbar() {
         </span>
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden gap-6 md:flex">
+        {/* Desktop links + Admin */}
+        <div className="hidden items-center gap-6 md:flex">
         {links.map((l) => (
             <Link
             key={l.href}
             href={l.href}
+            prefetch={false}
             className={`text-sm transition ${
                 pathname === l.href ? 'text-slate-900' : 'text-slate-600 hover:text-slate-900'
             }`}
-            prefetch={false}
             >
             {l.label}
             </Link>
         ))}
+
+        {/* Botón Admin con estilo corporativo */}
+        <Link href="/admin" prefetch={false} className="btn-secondary">
+        Admin
+        </Link>
         </div>
 
         {/* Mobile button */}
@@ -63,18 +66,30 @@ export default function Navbar() {
         {/* Mobile menu */}
         {open && (
             <div className="border-t bg-white md:hidden">
-            <div className="mx-auto flex max-w-6xl flex-col px-4 py-3">
+            <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3">
             {links.map((l) => (
                 <Link
                 key={l.href}
                 href={l.href}
-                className={`py-2 text-sm ${pathname === l.href ? 'text-slate-900' : 'text-slate-700'}`}
-                onClick={() => setOpen(false)}
                 prefetch={false}
+                className={`py-2 text-sm ${
+                    pathname === l.href ? 'text-slate-900' : 'text-slate-700'
+                }`}
+                onClick={() => setOpen(false)}
                 >
                 {l.label}
                 </Link>
             ))}
+
+            {/* Admin como botón en móvil */}
+            <Link
+            href="/admin"
+            prefetch={false}
+            className="btn-secondary"
+            onClick={() => setOpen(false)}
+            >
+            Admin
+            </Link>
             </div>
             </div>
         )}

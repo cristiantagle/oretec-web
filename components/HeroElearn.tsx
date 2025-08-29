@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export default function HeroElearn() {
     return (
-        <header className="relative bg-white">
+        <header className="relative bg-oret-gradient">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-20">
         <div>
         <h1
@@ -20,10 +20,10 @@ export default function HeroElearn() {
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-        <Link href="/courses" className="rounded-xl px-5 py-3 text-white" style={{ background: '#1E3A8A' }}>
+        <Link href="/courses" className="btn-primary">
         Ver catálogo de cursos
         </Link>
-        <Link href="#contacto" className="rounded-xl border px-5 py-3 text-[#1E3A8A]" style={{ borderColor: '#1E3A8A' }}>
+        <Link href="#contacto" className="btn-secondary">
         Asesoría para empresas
         </Link>
         </div>
@@ -35,9 +35,8 @@ export default function HeroElearn() {
         </ul>
         </div>
 
-        {/* Contenedor de imagen con capas controladas */}
+        {/* Contenedor de imagen */}
         <div className="relative h-[280px] w-full md:h-[340px]">
-        {/* Imagen principal (cache-bust v=2) */}
         <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl shadow-soft">
         <Image
         src="/images/hero-elearning.png?v=2"
@@ -49,7 +48,7 @@ export default function HeroElearn() {
         />
         </div>
 
-        {/* Chips arriba de la imagen */}
+        {/* Chips */}
         <div className="card absolute -bottom-4 -left-4 z-10 px-4 py-3 text-sm">
         <div className="font-medium text-slate-800">Cursos activos</div>
         <div className="text-slate-600">Catálogo actualizado — CLP</div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import CourseCard from '@/components/CourseCard'
 import FadeIn from '@/components/FadeIn'
+import BackButton from '@/components/BackButton'
 
 type APICourse = Record<string, any>
 
@@ -83,10 +84,14 @@ export default function CoursesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-    <div className="flex items-center justify-between">
+    {/* Barra superior: título + acciones */}
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
     <FadeIn>
-    <h1 className="text-2xl font-semibold text-slate-900" style={{ fontFamily: 'var(--font-display)' }}>
+    <h1
+    className="text-2xl font-semibold text-slate-900"
+    style={{ fontFamily: 'var(--font-display)' }}
+    >
     Catálogo de cursos
     </h1>
     <p className="mt-1 text-slate-600">
@@ -94,14 +99,18 @@ export default function CoursesPage() {
     </p>
     </FadeIn>
     </div>
+
+    <div className="flex gap-2">
+    <BackButton label="← Volver al inicio" href="/" />
     <button
     onClick={() => { setNonce(n => n + 1); load() }} // fuerza recarga inmediata
-    className="rounded-xl border px-3 py-2 text-sm"
-    style={{ borderColor: '#1E3A8A', color: '#1E3A8A' }}
+    className="btn-secondary"
     title="Forzar recarga (sin caché)"
+    type="button"
     >
     ↻ Actualizar
     </button>
+    </div>
     </div>
 
     {loading ? (
@@ -126,7 +135,7 @@ export default function CoursesPage() {
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {courses.map((c) => (
         <FadeIn
-        key={(c.id as string) || (c.slug as string) || (c.code as string) || courseTitle(c)} // keys estables, sin índice
+        key={(c.id as string) || (c.slug as string) || (c.code as string) || courseTitle(c)}
         delay={0.03}
         >
         <CourseCard
