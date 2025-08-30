@@ -1,4 +1,3 @@
-// components/Testimonials.tsx
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -8,25 +7,29 @@ type Testimonial = {
     id?: string
     quote: string
     name: string
-    role: string
-    initials: string
+    role: string | null
+    initials: string | null
 }
 
-const LOCAL_ITEMS: Testimonial[] = [
+// Fallback local si la API no devuelve nada
+const FALLBACK: Testimonial[] = [
     {
-        quote: 'Contenido claro y práctico. El proceso de certificación fue muy rápido.',
+        quote:
+        'Contenido claro y práctico. El proceso de certificación fue muy rápido.',
         name: 'María P.',
         role: 'Encargada de Prevención',
         initials: 'MP',
     },
 {
-    quote: 'Ideal para capacitar turnos. 100% online y con soporte excelente.',
+    quote:
+    'Ideal para capacitar turnos. 100% online y con soporte excelente.',
     name: 'Carlos R.',
     role: 'Jefe de Operaciones',
     initials: 'CR',
 },
 {
-    quote: 'Cumplimos la normativa sin interrumpir la producción. Recomendado.',
+    quote:
+    'Cumplimos la normativa sin interrumpir la producción. Recomendado.',
     name: 'Valentina G.',
     role: 'RRHH',
     initials: 'VG',
@@ -67,94 +70,67 @@ function QuoteMark() {
 }
 
 export default function Testimonials() {
-    // === Carga dinámica (sin romper tu carrusel) ===
-    const [items, setItems] = useState<Testimonial[]>(LOCAL_ITEMS)
-    const [loaded, setLoaded] = useState(false)
+    const [items, setItems] = useState<Testimonial[]>([])
+    const [loading, setLoading] = useState(true)
+    const [currentIndex, setCurrentIndex] = useState(0)
+    const [atStart, setAtStart] = useState(true)
+    const [atEnd, setAtEnd] = useState(false)
 
+    const trackRef = useRef<HTMLDivElement | null>(null)
+
+    // Cargar testimonios publicados desde la API pública
     useEffect(() => {
-        let alive = true
-        async function load() {
+        let ok = true
+        ;(async () => {
+            setLoading(true)
             try {
                 const ts = Date.now()
                 const r = await fetch(`/api/public/testimonials?ts=${ts}`, { cache: 'no-store' })
-                if (!r.ok) throw new Error('HTTP ' + r.status)
-                    const data = await r.json()
-                    if (!alive) return
-                        if (Array.isArray(data) && data.length) {
-                            // Normalizamos a tu shape (por si vienen nulls)
-                            const norm: Testimonial[] = data.map((d: any) => ({
-                                id: d.id,
-                                quote: String(d.quote ?? ''),
-                                                                              name: String(d.name ?? ''),
-                                                                              role: String(d.role ?? ''),
-                                                                              initials: String(d.initials ?? (d.name?.split(' ')?.map((w:string)=>w[0]).slice(0,2).join('') ?? '')).toUpperCase(),
-                            })).filter((t: Testimonial) => t.quote && t.name)
-                            if (norm.length) setItems(norm)
-                        }
+                const data = await r.json().catch(() => [])
+                if (!ok) return
+                    const arr = Array.isArray(data) ? data : []
+                    setItems(arr.length ? arr : FALLBACK)
             } catch {
-                // Silencioso: nos quedamos con LOCAL_ITEMS
+                setItems(FALLBACK)
             } finally {
-                if (alive) setLoaded(true)
+                setLoading(false)
+                // Espera un frame para medir correctamente el ancho
+                requestAnimationFrame(() => updateEdges())
             }
-        }
-        load()
-        return () => { alive = false }
+        })()
+        return () => { ok = false }
     }, [])
 
-    // === Tu carrusel intacto ===
-    const trackRef = useRef<HTMLDivElement | null>(null)
-    const [atStart, setAtStart] = useState(true)
-    const [atEnd, setAtEnd] = useState(false)
+    const TOL = 2 // tolerancia px para cálculo de bordes
 
     const updateEdges = () => {
         const el = trackRef.current
         if (!el) return
             const { scrollLeft, scrollWidth, clientWidth } = el
-            setAtStart(scrollLeft <= 2)
-            setAtEnd(scrollLeft + clientWidth >= scrollWidth - 2)
+            setAtStart(scrollLeft <= TOL)
+            setAtEnd(scrollLeft + clientWidth >= scrollWidth - TOL)
     }
 
     useEffect(() => {
-        updateEdges()
         const el = trackRef.current
         if (!el) return
             const onScroll = () => updateEdges()
             el.addEventListener('scroll', onScroll, { passive: true })
-            return () => el.removeEventListener('scroll', onScroll)
-    }, [])
-
-    useEffect(() => {
-        const el = trackRef.current
-        if (!el) return
-            let userInteracting = false
-            const onPointerDown = () => (userInteracting = true)
-            const onPointerUp = () => { userInteracting = false }
-            el.addEventListener('pointerdown', onPointerDown)
-            window.addEventListener('pointerup', onPointerUp)
-
-            const id = setInterval(() => {
-                if (!el || userInteracting) return
-                    const next = el.scrollLeft + el.clientWidth * 0.9
-                    if (next >= el.scrollWidth - el.clientWidth) {
-                        el.scrollTo({ left: 0, behavior: 'smooth' })
-                    } else {
-                        el.scrollTo({ left: next, behavior: 'smooth' })
-                    }
-            }, 4500)
-
+            window.addEventListener('resize', updateEdges)
             return () => {
-                clearInterval(id)
-                el.removeEventListener('pointerdown', onPointerDown)
-                window.removeEventListener('pointerup', onPointerUp)
+                el.removeEventListener('scroll', onScroll)
+                window.removeEventListener('resize', updateEdges)
             }
     }, [])
 
     const scrollByPage = (dir: -1 | 1) => {
         const el = trackRef.current
         if (!el) return
-            const delta = el.clientWidth * 0.95 * dir
+            const delta = el.clientWidth * dir
             el.scrollBy({ left: delta, behavior: 'smooth' })
     }
+
+    const testimonialsToShow = items.slice(currentIndex, currentIndex + 3)
 
     return (
         <section className="mx-auto max-w-6xl px-4 py-16">
@@ -169,68 +145,80 @@ export default function Testimonials() {
         </div>
         </FadeIn>
 
-        {/* Carrusel */}
-        <div className="relative">
-        {/* Gradientes laterales */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
+        {/* Estado de carga */}
+        {loading ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="card shadow-soft p-6 animate-pulse">
+                <div className="h-4 w-24 rounded bg-slate-100" />
+                <div className="mt-3 h-4 w-3/4 rounded bg-slate-100" />
+                <div className="mt-2 h-4 w-1/2 rounded bg-slate-100" />
+                <div className="mt-5 h-8 w-32 rounded bg-slate-100" />
+                </div>
+            ))}
+            </div>
+        ) : (
+            <div className="relative">
+            {/* Gradientes laterales */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
 
-        {/* Pista scrollable con snap */}
-        <div
-        ref={trackRef}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-1 pb-2"
-        style={{ scrollbarWidth: 'none' }}
-        onWheel={updateEdges}
-        onTouchMove={updateEdges}
-        >
-        {items.map((t, i) => (
-            <FadeIn key={t.id ?? `${t.name}-${i}`} delay={0.04 * (i + 1)}>
-            <article className="card shadow-soft hover:shadow-md transition-all duration-300 ease-out snap-start min-w-[88%] sm:min-w-[48%] lg:min-w-[32%] bg-white p-6">
-            <div className="flex items-center justify-between">
-            <Stars />
-            <QuoteMark />
+            {/* Pista scrollable (1/2/3 por vista) */}
+            <div
+            ref={trackRef}
+            className="flex gap-4 overflow-x-auto scroll-smooth px-1 pb-2"
+            style={{ scrollbarWidth: 'none' }}
+            onWheel={updateEdges}
+            onTouchMove={updateEdges}
+            >
+            {testimonialsToShow.map((t, i) => (
+                <FadeIn key={t.id || i} delay={0.03 * (i + 1)}>
+                <article
+                className="card shadow-soft hover:shadow-md transition-all duration-300 ease-out bg-white p-6
+                flex-none min-w-[88%] sm:min-w-[48%] lg:min-w-[32%]"
+                >
+                <div className="flex items-center justify-between">
+                <Stars />
+                <QuoteMark />
+                </div>
+
+                <p className="mt-3 text-slate-700">“{t.quote}”</p>
+
+                <div className="mt-5 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white text-sm font-semibold">
+                {t.initials || (t.name?.slice(0, 2).toUpperCase() ?? 'UX')}
+                </div>
+                <div>
+                <div className="font-medium text-slate-900">{t.name}</div>
+                {t.role && <div className="text-xs text-slate-500">{t.role}</div>}
+                </div>
+                </div>
+                </article>
+                </FadeIn>
+            ))}
             </div>
 
-            <p className="mt-3 text-slate-700">
-            “{t.quote}”
-            </p>
-
-            <div className="mt-5 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white text-sm font-semibold">
-            {t.initials}
+            {/* Controles */}
+            <div className="mt-4 flex justify-center gap-2">
+            <button
+            type="button"
+            onClick={() => setCurrentIndex((prev) => Math.max(prev - 3, 0))}
+            className={`btn-secondary ${currentIndex === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
+            disabled={currentIndex === 0}
+            >
+            ← Anterior
+            </button>
+            <button
+            type="button"
+            onClick={() => setCurrentIndex((prev) => Math.min(prev + 3, items.length - 1))}
+            className={`btn-primary ${currentIndex + 3 >= items.length ? 'opacity-40 cursor-not-allowed' : ''}`}
+            disabled={currentIndex + 3 >= items.length}
+            >
+            Siguiente →
+            </button>
             </div>
-            <div>
-            <div className="font-medium text-slate-900">{t.name}</div>
-            <div className="text-xs text-slate-500">{t.role}</div>
             </div>
-            </div>
-            </article>
-            </FadeIn>
-        ))}
-        </div>
-
-        {/* Controles */}
-        <div className="mt-4 flex justify-center gap-2">
-        <button
-        type="button"
-        onClick={() => scrollByPage(-1)}
-        className={`btn-secondary ${atStart ? 'opacity-40 cursor-not-allowed' : ''}`}
-        aria-label="Ver testimonios anteriores"
-        disabled={atStart}
-        >
-        ← Anterior
-        </button>
-        <button
-        type="button"
-        onClick={() => scrollByPage(1)}
-        className={`btn-primary ${atEnd ? 'opacity-40 cursor-not-allowed' : ''}`}
-        aria-label="Ver más testimonios"
-        disabled={atEnd}
-        >
-        Siguiente →
-        </button>
-        </div>
-        </div>
+        )}
         </section>
     )
 }
