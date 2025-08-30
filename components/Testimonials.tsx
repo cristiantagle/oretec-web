@@ -5,30 +5,28 @@ import { useEffect, useRef, useState } from 'react'
 import FadeIn from '@/components/FadeIn'
 
 type Testimonial = {
+    id?: string
     quote: string
     name: string
     role: string
     initials: string
 }
 
-const items: Testimonial[] = [
+const LOCAL_ITEMS: Testimonial[] = [
     {
-        quote:
-        'Contenido claro y práctico. El proceso de certificación fue muy rápido.',
+        quote: 'Contenido claro y práctico. El proceso de certificación fue muy rápido.',
         name: 'María P.',
         role: 'Encargada de Prevención',
         initials: 'MP',
     },
 {
-    quote:
-    'Ideal para capacitar turnos. 100% online y con soporte excelente.',
+    quote: 'Ideal para capacitar turnos. 100% online y con soporte excelente.',
     name: 'Carlos R.',
     role: 'Jefe de Operaciones',
     initials: 'CR',
 },
 {
-    quote:
-    'Cumplimos la normativa sin interrumpir la producción. Recomendado.',
+    quote: 'Cumplimos la normativa sin interrumpir la producción. Recomendado.',
     name: 'Valentina G.',
     role: 'RRHH',
     initials: 'VG',
@@ -69,11 +67,45 @@ function QuoteMark() {
 }
 
 export default function Testimonials() {
+    // === Carga dinámica (sin romper tu carrusel) ===
+    const [items, setItems] = useState<Testimonial[]>(LOCAL_ITEMS)
+    const [loaded, setLoaded] = useState(false)
+
+    useEffect(() => {
+        let alive = true
+        async function load() {
+            try {
+                const ts = Date.now()
+                const r = await fetch(`/api/public/testimonials?ts=${ts}`, { cache: 'no-store' })
+                if (!r.ok) throw new Error('HTTP ' + r.status)
+                    const data = await r.json()
+                    if (!alive) return
+                        if (Array.isArray(data) && data.length) {
+                            // Normalizamos a tu shape (por si vienen nulls)
+                            const norm: Testimonial[] = data.map((d: any) => ({
+                                id: d.id,
+                                quote: String(d.quote ?? ''),
+                                                                              name: String(d.name ?? ''),
+                                                                              role: String(d.role ?? ''),
+                                                                              initials: String(d.initials ?? (d.name?.split(' ')?.map((w:string)=>w[0]).slice(0,2).join('') ?? '')).toUpperCase(),
+                            })).filter((t: Testimonial) => t.quote && t.name)
+                            if (norm.length) setItems(norm)
+                        }
+            } catch {
+                // Silencioso: nos quedamos con LOCAL_ITEMS
+            } finally {
+                if (alive) setLoaded(true)
+            }
+        }
+        load()
+        return () => { alive = false }
+    }, [])
+
+    // === Tu carrusel intacto ===
     const trackRef = useRef<HTMLDivElement | null>(null)
     const [atStart, setAtStart] = useState(true)
     const [atEnd, setAtEnd] = useState(false)
 
-    // Actualiza estados para habilitar/deshabilitar botones
     const updateEdges = () => {
         const el = trackRef.current
         if (!el) return
@@ -91,15 +123,12 @@ export default function Testimonials() {
             return () => el.removeEventListener('scroll', onScroll)
     }, [])
 
-    // Auto-avance suave (pausa si el usuario interactúa)
     useEffect(() => {
         const el = trackRef.current
         if (!el) return
             let userInteracting = false
             const onPointerDown = () => (userInteracting = true)
-            const onPointerUp = () => {
-                userInteracting = false
-            }
+            const onPointerUp = () => { userInteracting = false }
             el.addEventListener('pointerdown', onPointerDown)
             window.addEventListener('pointerup', onPointerUp)
 
@@ -142,7 +171,7 @@ export default function Testimonials() {
 
         {/* Carrusel */}
         <div className="relative">
-        {/* Gradientes de desvanecimiento laterales */}
+        {/* Gradientes laterales */}
         <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
 
@@ -155,7 +184,7 @@ export default function Testimonials() {
         onTouchMove={updateEdges}
         >
         {items.map((t, i) => (
-            <FadeIn key={i} delay={0.04 * (i + 1)}>
+            <FadeIn key={t.id ?? `${t.name}-${i}`} delay={0.04 * (i + 1)}>
             <article className="card shadow-soft hover:shadow-md transition-all duration-300 ease-out snap-start min-w-[88%] sm:min-w-[48%] lg:min-w-[32%] bg-white p-6">
             <div className="flex items-center justify-between">
             <Stars />

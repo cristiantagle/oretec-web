@@ -74,6 +74,11 @@ export default function AdminPage() {
     Gestionar cursos
     </Link>
 
+    {/* NUEVO: botón para testimonios */}
+    <Link href="/admin/testimonials" className="btn-secondary">
+    Gestionar testimonios
+    </Link>
+
     {/* Logout por POST a /api/admin/logout */}
     <form action="/api/admin/logout" method="post">
     <button type="submit" className="btn-secondary">
