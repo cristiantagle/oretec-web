@@ -14,10 +14,13 @@ import WhatsappFab from '@/components/WhatsappFab'
 // Banner SVG (nuevo)
 import BannerStrip from '@/components/BannerStrip'
 
-// Añadidos visuales (nuevos)
+// Añadidos visuales
 import SectionWave from '@/components/SectionWave'
 import TiltCard from '@/components/TiltCard'
 import GlowBreak from '@/components/GlowBreak'
+
+// Títulos unificados
+import SectionTitle from '@/components/SectionTitle'
 
 export const metadata = {
   title: 'OreTec — Formación e-learning en Prevención y Seguridad Laboral',
@@ -45,12 +48,9 @@ export default function HomePage() {
     <section className="relative">
     <div className="absolute inset-0 -z-10 bg-oret-gradient" />
     <div className="mx-auto max-w-6xl px-4 py-16">
-    <div className="mb-8 text-center">
-    <h2 className="text-2xl font-semibold text-slate-900">¿Por qué elegir OreTec?</h2>
-    <p className="mt-2 text-slate-600">
-    Plataforma e-learning enfocada en seguridad y prevención laboral en Chile.
-    </p>
-    </div>
+    <SectionTitle subtitle="Plataforma e-learning enfocada en seguridad y prevención laboral en Chile.">
+    ¿Por qué elegir OreTec?
+    </SectionTitle>
     <FeatureCards />
     </div>
     </section>
