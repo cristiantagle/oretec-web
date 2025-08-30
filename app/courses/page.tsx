@@ -46,6 +46,7 @@ export default function CoursesPage() {
         }
         return null
   }
+
   const toHours = (v: any): number | null => {
     if (v == null) return null
       if (typeof v === 'number' && Number.isFinite(v)) return Math.round(v)
@@ -54,6 +55,7 @@ export default function CoursesPage() {
         }
         return null
   }
+
   const firstOf = (obj: any, keys: string[]): any => {
     for (const k of keys) {
       if (!obj) continue
@@ -66,42 +68,47 @@ export default function CoursesPage() {
     }
     return null
   }
+
   const courseTitle = (c: APICourse): string =>
   (firstOf(c, ['title','course_title','name','titulo','nombre']) as string) ?? 'Curso'
+
   const courseCode = (c: APICourse): string | null =>
   (firstOf(c, ['code','course_code','sku','codigo','código','slug']) as string) ?? null
+
   const courseDesc = (c: APICourse): string | null =>
   (firstOf(c, ['description','summary','desc','descripcion','descripción','resumen']) as string) ?? null
+
   const priceCLP = (c: APICourse): number | null => {
     const centsLikePesos = firstOf(c, ['price_cents', 'price_clp', 'price'])
     return toInt(centsLikePesos)
   }
+
   const hours = (c: APICourse): number | null =>
   toHours(firstOf(c, ['hours','horas','duration','duracion','duración','duration_hours','hrs','meta.hours']))
+
   const buyLink = (c: APICourse): string | null =>
   (firstOf(c, ['mp_link','mercado_pago_url','mp_url','payment_link','checkout_url','buy_url','url','links.buy','links.checkout']) as string) ?? null
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-    {/* Barra superior: título + acciones */}
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    {/* Título unificado */}
     <FadeIn>
     <SectionTitle subtitle="Formación e-learning en prevención y seguridad laboral — Chile.">
     Catálogo de cursos
     </SectionTitle>
     </FadeIn>
 
-    <div className="flex gap-2">
+    {/* Acciones (abajo del título) */}
+    <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
     <BackButton label="← Volver al inicio" href="/" />
     <button
-    onClick={() => { setNonce(n => n + 1); load() }} // fuerza recarga inmediata
+    onClick={() => { setNonce(n => n + 1); load() }}
     className="btn-secondary"
     title="Forzar recarga (sin caché)"
     type="button"
     >
     ↻ Actualizar
     </button>
-    </div>
     </div>
 
     {loading ? (

@@ -67,7 +67,12 @@ export default function HomePage() {
     <GlowBreak />
 
     {/* Testimonios */}
+    <section className="mx-auto max-w-6xl px-4 py-16">
+    <SectionTitle subtitle="Empresas y profesionales que ya capacitan con OreTec.">
+    Qué dicen nuestros clientes
+    </SectionTitle>
     <Testimonials />
+    </section>
 
     <section className="mx-auto max-w-6xl px-4 py-16">
     {/* CTA con tilt sutil */}
@@ -78,7 +83,10 @@ export default function HomePage() {
 
     {/* Utilidades flotantes */}
     <ScrollTop />
-    <WhatsappFab phone="56912345678" message="Hola, quiero información sobre los cursos de OreTec." />
+    <WhatsappFab
+    phone="56912345678"
+    message="Hola, quiero información sobre los cursos de OreTec."
+    />
     </main>
   )
 }

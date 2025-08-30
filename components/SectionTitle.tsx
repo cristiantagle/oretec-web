@@ -3,7 +3,13 @@
 import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 
-export default function SectionTitle({ children, subtitle }: { children: ReactNode; subtitle?: ReactNode }) {
+export default function SectionTitle({
+    children,
+    subtitle,
+}: {
+    children: ReactNode
+    subtitle?: ReactNode
+}) {
     return (
         <div className="mb-12 text-center">
         <motion.h2
@@ -14,13 +20,19 @@ export default function SectionTitle({ children, subtitle }: { children: ReactNo
         viewport={{ once: true }}
         >
         {children}
-        {/* Línea decorativa con animación */}
+
+        {/* Línea decorativa con gradiente animado */}
         <motion.span
-        className="mt-2 block h-1 w-20 rounded-full bg-gradient-to-r from-blue-700 to-indigo-500 mx-auto"
-        initial={{ scaleX: 0 }}
-        whileInView={{ scaleX: 1 }}
-        transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
+        className="mt-3 block h-1 w-24 rounded-full mx-auto bg-gradient-to-r from-blue-700 via-indigo-500 to-blue-700 bg-[length:200%_100%]"
+        initial={{ backgroundPosition: '100% 0', scaleX: 0 }}
+        whileInView={{ backgroundPosition: '0% 0', scaleX: 1 }}
+        transition={{
+            duration: 0.8,
+            delay: 0.3,
+            ease: 'easeOut',
+        }}
         viewport={{ once: true }}
+        style={{ transformOrigin: 'center' }}
         />
         </motion.h2>
 

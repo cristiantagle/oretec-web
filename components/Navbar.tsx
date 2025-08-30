@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const links = [
     { href: '/', label: 'Inicio' },
@@ -14,11 +15,18 @@ export default function Navbar() {
     const pathname = usePathname()
     const [open, setOpen] = useState(false)
 
+    const isActive = (href: string) => {
+        if (href === '/') return pathname === '/'
+            if (href.startsWith('/#')) return pathname === '/'
+                return pathname.startsWith(href)
+    }
+
     return (
-        <nav className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
+        <nav className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur"
+        data-theme-border>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo + nombre */}
-        <Link href="/" className="flex items-center gap-3" prefetch={false}>
+        <Link href="/" className="flex items-center gap-3" prefetch={false} aria-label="Ir al inicio">
         <img
         src="/images/logo-oretec.png?v=2"
         alt="OreTec"
@@ -32,25 +40,39 @@ export default function Navbar() {
         </span>
         </Link>
 
-        {/* Desktop links + Admin */}
-        <div className="hidden items-center gap-6 md:flex">
-        {links.map((l) => (
-            <Link
-            key={l.href}
-            href={l.href}
-            prefetch={false}
-            className={`link-anim text-sm ${
-                pathname === l.href ? 'text-blue-700' : 'text-slate-600'
-            }`}
-            >
-            {l.label}
-            </Link>
-        ))}
+        {/* Desktop */}
+        <div className="hidden items-center gap-2 md:flex">
+        {links.map((l) => {
+            const active = isActive(l.href)
+            return (
+                <Link
+                key={l.href}
+                href={l.href}
+                prefetch={false}
+                aria-current={active ? 'page' : undefined}
+                className={`group relative inline-flex items-center rounded-lg px-2 py-1 text-sm transition-colors ${
+                    active ? 'text-blue-700' : 'text-slate-600 hover:text-slate-900'
+                } hover:bg-slate-50 focus-visible:bg-slate-50`}
+                >
+                <span className="relative z-10">{l.label}</span>
+                <span
+                aria-hidden
+                className={`pointer-events-none absolute -bottom-0.5 left-2 right-2 h-0.5 origin-left bg-current transition-transform duration-300 ${
+                    active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                }`}
+                />
+                </Link>
+            )
+        })}
 
-        {/* Botón Admin */}
-        <Link href="/admin" prefetch={false} className="btn-secondary">
+        <Link href="/admin" prefetch={false} className="btn-secondary ml-2">
         Admin
         </Link>
+
+        {/* Toggle tema */}
+        <div className="ml-2">
+        <ThemeToggle />
+        </div>
         </div>
 
         {/* Mobile button */}
@@ -58,6 +80,7 @@ export default function Navbar() {
         className="inline-flex items-center rounded-md border px-3 py-1.5 text-sm md:hidden"
         onClick={() => setOpen((v) => !v)}
         aria-label="Abrir menú"
+        aria-expanded={open}
         style={{ borderColor: '#e5e7eb' }}
         >
         Menú
@@ -68,26 +91,35 @@ export default function Navbar() {
         {open && (
             <div className="border-t bg-white md:hidden">
             <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3">
-            {links.map((l) => (
-                <Link
-                key={l.href}
-                href={l.href}
-                prefetch={false}
-                className={`py-2 text-sm ${pathname === l.href ? 'text-blue-700' : 'text-slate-700'}`}
-                onClick={() => setOpen(false)}
-                >
-                {l.label}
-                </Link>
-            ))}
+            {links.map((l) => {
+                const active = isActive(l.href)
+                return (
+                    <Link
+                    key={l.href}
+                    href={l.href}
+                    prefetch={false}
+                    className={`rounded-lg px-2 py-2 text-sm ${
+                        active ? 'text-blue-700 bg-blue-50' : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                    onClick={() => setOpen(false)}
+                    aria-current={active ? 'page' : undefined}
+                    >
+                    {l.label}
+                    </Link>
+                )
+            })}
 
+            <div className="mt-2 flex items-center justify-between">
             <Link
             href="/admin"
             prefetch={false}
-            className="btn-secondary mt-2"
+            className="btn-secondary"
             onClick={() => setOpen(false)}
             >
             Admin
             </Link>
+            <ThemeToggle />
+            </div>
             </div>
             </div>
         )}

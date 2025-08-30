@@ -24,9 +24,23 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // Inline script para evitar FOUC: setea data-theme lo antes posible
+  const themeInit = `
+  (function(){
+    try {
+      var ls = localStorage.getItem('theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var t = (ls === 'dark' || ls === 'light') ? ls : (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  })();`
+
   return (
-    <html lang="es" className={`${inter.variable} ${poppins.variable}`}>
-    <body className="bg-white text-slate-900 font-sans">
+    <html lang="es" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
+    <head>
+    <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+    </head>
+    <body className="font-sans bg-[var(--bg)] text-[var(--text)]">
     <Navbar />
     <main>{children}</main>
     <Footer />
