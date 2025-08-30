@@ -1,3 +1,4 @@
+// app/courses/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -17,7 +18,6 @@ export default function CoursesPage() {
     setLoading(true)
     setError(null)
     try {
-      // cache-buster para evitar cualquier caché intermedia
       const ts = Date.now()
       const r = await fetch(`/api/public/courses?ts=${ts}&n=${nonce}`, { cache: 'no-store' })
       if (!r.ok) throw new Error(await r.text().catch(() => `HTTP ${r.status}`))
@@ -73,7 +73,6 @@ export default function CoursesPage() {
   const courseDesc = (c: APICourse): string | null =>
   (firstOf(c, ['description','summary','desc','descripcion','descripción','resumen']) as string) ?? null
   const priceCLP = (c: APICourse): number | null => {
-    // En tu backend guardas PESOS en price_cents ⇒ úsalo directo.
     const centsLikePesos = firstOf(c, ['price_cents', 'price_clp', 'price'])
     return toInt(centsLikePesos)
   }
@@ -84,8 +83,20 @@ export default function CoursesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-    {/* Barra superior: título + acciones */}
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    {/* Banda superior con mismo “hover” que las cards */}
+    <div
+    className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-sm
+    transition duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 will-change-transform"
+    >
+    <div
+    aria-hidden
+    className="pointer-events-none absolute inset-0 -z-10 opacity-80"
+    style={{
+      background:
+      'radial-gradient(1200px 400px at 0% 0%, rgba(30,58,138,0.05), transparent 50%), radial-gradient(800px 300px at 100% 0%, rgba(30,58,138,0.05), transparent 55%)',
+    }}
+    />
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
     <FadeIn>
     <h1
@@ -103,7 +114,7 @@ export default function CoursesPage() {
     <div className="flex gap-2">
     <BackButton label="← Volver al inicio" href="/" />
     <button
-    onClick={() => { setNonce(n => n + 1); load() }} // fuerza recarga inmediata
+    onClick={() => { setNonce(n => n + 1); load() }}
     className="btn-secondary"
     title="Forzar recarga (sin caché)"
     type="button"
@@ -113,6 +124,11 @@ export default function CoursesPage() {
     </div>
     </div>
 
+    {/* Separador ondulado sutil */}
+    <WaveSep />
+    </div>
+
+    {/* Grid de cursos */}
     {loading ? (
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
@@ -143,7 +159,7 @@ export default function CoursesPage() {
         code={courseCode(c)}
         hours={hours(c)}
         priceCLP={priceCLP(c)}
-        href={buyLink(c)}      // puede ser null; el card lo maneja
+        href={buyLink(c)}
         description={courseDesc(c)}
         />
         </FadeIn>
@@ -156,5 +172,30 @@ export default function CoursesPage() {
       </div>
     )}
     </main>
+  )
+}
+
+/** Separador ondulado decorativo (inline) */
+function WaveSep() {
+  return (
+    <svg
+    viewBox="0 0 1200 80"
+    xmlns="http://www.w3.org/2000/svg"
+    className="mt-6 h-8 w-full"
+    aria-hidden="true"
+    focusable="false"
+    >
+    <path
+    d="M0,40 C200,80 400,0 600,40 C800,80 1000,0 1200,40 L1200,80 L0,80 Z"
+    fill="url(#gradWave)"
+    opacity="0.5"
+    />
+    <defs>
+    <linearGradient id="gradWave" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stopColor="#EEF3FF" />
+    <stop offset="100%" stopColor="#FFFFFF" />
+    </linearGradient>
+    </defs>
+    </svg>
   )
 }

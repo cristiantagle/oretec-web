@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" role="img" aria-hidden="true">
+    <defs>
+        <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#EAF2FF"/>
+            <stop offset="50%" stop-color="#CFE0FF"/>
+            <stop offset="100%" stop-color="#BFD4FF"/>
+        </linearGradient>
+
+        <!-- ondas -->
+        <linearGradient id="wave1" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#1E3A8A" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#2563EB" stop-opacity="0.08"/>
+        </linearGradient>
+        <linearGradient id="wave2" x1="1" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.20"/>
+            <stop offset="100%" stop-color="#1E40AF" stop-opacity="0.10"/>
+        </linearGradient>
+
+        <!-- estilo de líneas/iconos sutiles -->
+        <style>
+            .line{fill:none;stroke:#1E3A8A;stroke-opacity:.16;stroke-width:2}
+            .icon{fill:none;stroke:#0F172A;stroke-opacity:.14;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        </style>
+    </defs>
+
+    <!-- fondo -->
+    <rect width="1440" height="320" fill="url(#bg)"/>
+
+    <!-- ondas abstractas -->
+    <path d="M0,210 C220,150 420,250 680,200 C900,160 1100,210 1440,170 L1440,320 L0,320 Z" fill="url(#wave1)"/>
+    <path d="M0,170 C260,220 520,130 760,160 C1000,190 1220,140 1440,200 L1440,320 L0,320 Z" fill="url(#wave2)"/>
+
+    <!-- líneas decorativas -->
+    <path class="line" d="M80 90 H420"/>
+    <path class="line" d="M1020 60 H1360"/>
+    <path class="line" d="M200 260 H1240"/>
+
+    <!-- micro-iconos temáticos (muy sutiles) -->
+    <!-- Wi-Fi -->
+    <g transform="translate(220 120) scale(1.1)">
+        <path class="icon" d="M0 16c12-12 32-12 44 0"/>
+        <path class="icon" d="M6 22c8-8 24-8 32 0"/>
+        <circle class="icon" cx="22" cy="28" r="2.5"/>
+    </g>
+
+    <!-- birrete -->
+    <g transform="translate(1180 120) scale(1.1)">
+        <path class="icon" d="M0 6 26 0 52 6 26 12 0 6z"/>
+        <path class="icon" d="M10 11v9c0 3 32 3 32 0v-9"/>
+        <path class="icon" d="M52 6v12"/>
+    </g>
+
+    <!-- libro -->
+    <g transform="translate(720 200) scale(1.05)">
+        <path class="icon" d="M0 0h40a6 6 0 0 1 6 6v20H6A6 6 0 0 1 0 20V0z"/>
+        <path class="icon" d="M0 6h46"/>
+    </g>
+</svg>
