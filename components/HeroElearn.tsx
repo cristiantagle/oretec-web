@@ -1,4 +1,3 @@
-// components/HeroElearn.tsx
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -8,7 +7,7 @@ export default function HeroElearn() {
     return (
         <header className="relative bg-white">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-20">
-        {/* Lado texto */}
+        {/* Texto */}
         <div>
         <FadeIn>
         <h1
@@ -30,12 +29,8 @@ export default function HeroElearn() {
 
         <FadeIn delay={0.1}>
         <div className="mt-6 flex flex-wrap gap-3">
-        <Link href="/courses" className="btn-primary">
-        Ver catálogo de cursos
-        </Link>
-        <Link href="#contacto" className="btn-secondary">
-        Asesoría para empresas
-        </Link>
+        <Link href="/courses" className="btn-primary">Ver catálogo de cursos</Link>
+        <Link href="#contacto" className="btn-secondary">Asesoría para empresas</Link>
         </div>
         </FadeIn>
 
@@ -48,10 +43,9 @@ export default function HeroElearn() {
         </FadeIn>
         </div>
 
-        {/* Lado imagen */}
+        {/* Imagen */}
         <FadeIn delay={0.2}>
         <div className="relative h-[280px] w-full md:h-[340px]">
-        {/* Imagen */}
         <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl shadow-soft">
         <Image
         src="/images/hero-elearning.png?v=2"
@@ -61,7 +55,7 @@ export default function HeroElearn() {
         sizes="(min-width: 768px) 520px, 100vw"
         className="rounded-3xl object-cover object-center"
         />
-        {/* Overlay degradado sutil para mejorar contraste del texto/chapas */}
+        {/* Overlay para contraste */}
         <div
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-3xl"
@@ -72,7 +66,7 @@ export default function HeroElearn() {
         />
         </div>
 
-        {/* Halo muy sutil alrededor (acorde al sistema visual) */}
+        {/* Halo sutil */}
         <div className="pointer-events-none absolute -inset-[1px] rounded-[26px]" style={{ boxShadow: '0 0 0 1px rgba(30,58,138,0.08)' }} />
 
         {/* Chips */}
@@ -95,4 +89,3 @@ export default function HeroElearn() {
         </header>
     )
 }
-

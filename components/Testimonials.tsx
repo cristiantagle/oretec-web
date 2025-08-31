@@ -1,6 +1,7 @@
+// components/Testimonials.tsx
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import FadeIn from '@/components/FadeIn'
 
 type Testimonial = {
@@ -13,41 +14,16 @@ type Testimonial = {
 
 // Fallback local si la API no devuelve nada
 const FALLBACK: Testimonial[] = [
-    {
-        quote:
-        'Contenido claro y práctico. El proceso de certificación fue muy rápido.',
-        name: 'María P.',
-        role: 'Encargada de Prevención',
-        initials: 'MP',
-    },
-{
-    quote:
-    'Ideal para capacitar turnos. 100% online y con soporte excelente.',
-    name: 'Carlos R.',
-    role: 'Jefe de Operaciones',
-    initials: 'CR',
-},
-{
-    quote:
-    'Cumplimos la normativa sin interrumpir la producción. Recomendado.',
-    name: 'Valentina G.',
-    role: 'RRHH',
-    initials: 'VG',
-},
+    { quote: 'Contenido claro y práctico. El proceso de certificación fue muy rápido.', name: 'María P.', role: 'Encargada de Prevención', initials: 'MP' },
+{ quote: 'Ideal para capacitar turnos. 100% online y con soporte excelente.', name: 'Carlos R.', role: 'Jefe de Operaciones', initials: 'CR' },
+{ quote: 'Cumplimos la normativa sin interrumpir la producción. Recomendado.', name: 'Valentina G.', role: 'RRHH', initials: 'VG' },
 ]
 
 function Stars() {
     return (
         <div className="flex gap-0.5" aria-label="5 de 5 estrellas">
         {Array.from({ length: 5 }).map((_, i) => (
-            <svg
-            key={i}
-            viewBox="0 0 20 20"
-            width="16"
-            height="16"
-            aria-hidden
-            className="text-amber-500 fill-current"
-            >
+            <svg key={i} viewBox="0 0 20 20" width="16" height="16" aria-hidden className="fill-current text-amber-500">
             <path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L10 15.9l-5.2 2.6.99-5.78L1.58 7.62l5.82-.85L10 1.5z" />
             </svg>
         ))}
@@ -57,13 +33,7 @@ function Stars() {
 
 function QuoteMark() {
     return (
-        <svg
-        viewBox="0 0 48 48"
-        width="28"
-        height="28"
-        aria-hidden
-        className="text-blue-700/20 fill-current"
-        >
+        <svg viewBox="0 0 48 48" width="28" height="28" aria-hidden className="fill-current text-blue-700/20">
         <path d="M17 10c-4.4 0-8 3.6-8 8v6c0 4.4 3.6 8 8 8h3v-8h-5v-2c0-2.2 1.8-4 4-4h1V10h-3zm21 0c-4.4 0-8 3.6-8 8v6c0 4.4 3.6 8 8 8h3v-8h-5v-2c0-2.2 1.8-4 4-4h1V10h-3z" />
         </svg>
     )
@@ -72,84 +42,63 @@ function QuoteMark() {
 export default function Testimonials() {
     const [items, setItems] = useState<Testimonial[]>([])
     const [loading, setLoading] = useState(true)
-    const [currentIndex, setCurrentIndex] = useState(0)
-    const [atStart, setAtStart] = useState(true)
-    const [atEnd, setAtEnd] = useState(false)
 
-    const trackRef = useRef<HTMLDivElement | null>(null)
+    // Paginación por 3
+    const PAGE_SIZE = 3
+    const [page, setPage] = useState(0)
 
-    // Cargar testimonios publicados desde la API pública
+    // Carga desde API pública
     useEffect(() => {
-        let ok = true
+        let alive = true
         ;(async () => {
             setLoading(true)
             try {
                 const ts = Date.now()
                 const r = await fetch(`/api/public/testimonials?ts=${ts}`, { cache: 'no-store' })
                 const data = await r.json().catch(() => [])
-                if (!ok) return
+                if (!alive) return
                     const arr = Array.isArray(data) ? data : []
                     setItems(arr.length ? arr : FALLBACK)
+                    setPage(0) // reset por si venía en otra página
             } catch {
-                setItems(FALLBACK)
+                if (!alive) return
+                    setItems(FALLBACK)
+                    setPage(0)
             } finally {
-                setLoading(false)
-                // Espera un frame para medir correctamente el ancho
-                requestAnimationFrame(() => updateEdges())
+                if (alive) setLoading(false)
             }
         })()
-        return () => { ok = false }
+        return () => { alive = false }
     }, [])
 
-    const TOL = 2 // tolerancia px para cálculo de bordes
+    const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE))
 
-    const updateEdges = () => {
-        const el = trackRef.current
-        if (!el) return
-            const { scrollLeft, scrollWidth, clientWidth } = el
-            setAtStart(scrollLeft <= TOL)
-            setAtEnd(scrollLeft + clientWidth >= scrollWidth - TOL)
-    }
-
+    // Asegura que la página siempre esté dentro de rango si cambia items
     useEffect(() => {
-        const el = trackRef.current
-        if (!el) return
-            const onScroll = () => updateEdges()
-            el.addEventListener('scroll', onScroll, { passive: true })
-            window.addEventListener('resize', updateEdges)
-            return () => {
-                el.removeEventListener('scroll', onScroll)
-                window.removeEventListener('resize', updateEdges)
-            }
-    }, [])
+        setPage((p) => Math.min(p, totalPages - 1))
+    }, [totalPages])
 
-    const scrollByPage = (dir: -1 | 1) => {
-        const el = trackRef.current
-        if (!el) return
-            const delta = el.clientWidth * dir
-            el.scrollBy({ left: delta, behavior: 'smooth' })
-    }
+    const canPrev = page > 0
+    const canNext = page < totalPages - 1
 
-    const testimonialsToShow = items.slice(currentIndex, currentIndex + 3)
+    const pageItems = useMemo(
+        () => items.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE),
+                              [items, page]
+    )
 
     return (
         <section className="mx-auto max-w-6xl px-4 py-16">
         <FadeIn>
         <div className="mb-8 text-center">
-        <h2 className="text-2xl font-semibold text-slate-900">
-        Qué dicen nuestros clientes
-        </h2>
-        <p className="mt-2 text-slate-600">
-        Empresas y profesionales que ya capacitan con OreTec.
-        </p>
+        <h2 className="text-2xl font-semibold text-slate-900">Qué dicen nuestros clientes</h2>
+        <p className="mt-2 text-slate-600">Empresas y profesionales que ya capacitan con OreTec.</p>
         </div>
         </FadeIn>
 
-        {/* Estado de carga */}
         {loading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="card shadow-soft p-6 animate-pulse">
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                <div key={i} className="card p-6 shadow-soft animate-pulse">
                 <div className="h-4 w-24 rounded bg-slate-100" />
                 <div className="mt-3 h-4 w-3/4 rounded bg-slate-100" />
                 <div className="mt-2 h-4 w-1/2 rounded bg-slate-100" />
@@ -158,32 +107,17 @@ export default function Testimonials() {
             ))}
             </div>
         ) : (
-            <div className="relative">
-            {/* Gradientes laterales */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent" />
-
-            {/* Pista scrollable (1/2/3 por vista) */}
-            <div
-            ref={trackRef}
-            className="flex gap-4 overflow-x-auto scroll-smooth px-1 pb-2"
-            style={{ scrollbarWidth: 'none' }}
-            onWheel={updateEdges}
-            onTouchMove={updateEdges}
-            >
-            {testimonialsToShow.map((t, i) => (
-                <FadeIn key={t.id || i} delay={0.03 * (i + 1)}>
-                <article
-                className="card shadow-soft hover:shadow-md transition-all duration-300 ease-out bg-white p-6
-                flex-none min-w-[88%] sm:min-w-[48%] lg:min-w-[32%]"
-                >
+            <>
+            {/* Tarjetas (3 por página) */}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pageItems.map((t, i) => (
+                <FadeIn key={t.id || `${page}-${i}`} delay={0.04 * (i + 1)}>
+                <article className="card bg-white p-6 shadow-soft transition-all duration-300 hover:shadow-md h-full">
                 <div className="flex items-center justify-between">
                 <Stars />
                 <QuoteMark />
                 </div>
-
                 <p className="mt-3 text-slate-700">“{t.quote}”</p>
-
                 <div className="mt-5 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white text-sm font-semibold">
                 {t.initials || (t.name?.slice(0, 2).toUpperCase() ?? 'UX')}
@@ -198,26 +132,48 @@ export default function Testimonials() {
             ))}
             </div>
 
-            {/* Controles */}
-            <div className="mt-4 flex justify-center gap-2">
+            {/* Controles + bullets */}
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+            <div className="flex gap-2">
             <button
             type="button"
-            onClick={() => setCurrentIndex((prev) => Math.max(prev - 3, 0))}
-            className={`btn-secondary ${currentIndex === 0 ? 'opacity-40 cursor-not-allowed' : ''}`}
-            disabled={currentIndex === 0}
+            onClick={() => canPrev && setPage((p) => Math.max(0, p - 1))}
+            className={`btn-secondary ${!canPrev ? 'cursor-not-allowed opacity-40' : ''}`}
+            disabled={!canPrev}
+            aria-label="Ver testimonios anteriores"
             >
             ← Anterior
             </button>
             <button
             type="button"
-            onClick={() => setCurrentIndex((prev) => Math.min(prev + 3, items.length - 1))}
-            className={`btn-primary ${currentIndex + 3 >= items.length ? 'opacity-40 cursor-not-allowed' : ''}`}
-            disabled={currentIndex + 3 >= items.length}
+            onClick={() => canNext && setPage((p) => Math.min(totalPages - 1, p + 1))}
+            className={`btn-primary ${!canNext ? 'cursor-not-allowed opacity-40' : ''}`}
+            disabled={!canNext}
+            aria-label="Ver más testimonios"
             >
             Siguiente →
             </button>
             </div>
+
+            {/* Bullets de página (clicables) */}
+            <div className="flex items-center gap-2">
+            {Array.from({ length: totalPages }).map((_, i) => {
+                const active = i === page
+                return (
+                    <button
+                    key={i}
+                    type="button"
+                    aria-label={`Ir a la página ${i + 1}`}
+                    onClick={() => setPage(i)}
+                    className={`h-2.5 w-2.5 rounded-full transition ${
+                        active ? 'bg-blue-700' : 'bg-slate-300 hover:bg-slate-400'
+                    }`}
+                    />
+                )
+            })}
             </div>
+            </div>
+            </>
         )}
         </section>
     )

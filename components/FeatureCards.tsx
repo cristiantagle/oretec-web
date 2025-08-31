@@ -3,26 +3,10 @@ import Image from 'next/image'
 import FadeIn from '@/components/FadeIn'
 
 const items = [
-    {
-        title: '100% Online',
-        desc: 'Accede desde cualquier dispositivo, en cualquier momento.',
-        img: '/images/icons/wifi.png',
-    },
-{
-    title: 'Certificación',
-    desc: 'Certificado digital al finalizar tus evaluaciones.',
-    img: '/images/icons/cap.png',
-},
-{
-    title: 'Compatibilidad',
-    desc: 'Funciona en computador, tablet y móvil sin instalaciones.',
-    img: '/images/icons/monitor.png',
-},
-{
-    title: 'Aprendizaje Moderno',
-    desc: 'Recursos interactivos y material actualizado.',
-    img: '/images/icons/book.png',
-},
+    { title: '100% Online', desc: 'Accede desde cualquier dispositivo, en cualquier momento.', img: '/images/icons/wifi.png' },
+{ title: 'Certificación', desc: 'Certificado digital al finalizar tus evaluaciones.', img: '/images/icons/cap.png' },
+{ title: 'Compatibilidad', desc: 'Funciona en computador, tablet y móvil sin instalaciones.', img: '/images/icons/monitor.png' },
+{ title: 'Aprendizaje Moderno', desc: 'Recursos interactivos y material actualizado.', img: '/images/icons/book.png' },
 ]
 
 export default function FeatureCards() {
@@ -42,14 +26,7 @@ export default function FeatureCards() {
             className="relative h-16 w-16 flex items-center justify-center rounded-xl bg-blue-50
             transition group-hover:bg-blue-100 group-hover:scale-110"
             >
-            <Image
-            src={it.img}
-            alt=""
-            fill
-            className="object-contain"
-            sizes="64px"
-            priority={i < 2}
-            />
+            <Image src={it.img} alt="" fill className="object-contain" sizes="64px" priority={i < 2} />
             </div>
             <h3
             className="text-lg font-semibold text-slate-900 relative inline-block after:absolute

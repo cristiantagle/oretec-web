@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import ThemeToggle from '@/components/ThemeToggle'
+import { useEffect, useState } from 'react'
 
 const links = [
     { href: '/', label: 'Inicio' },
@@ -14,16 +13,29 @@ const links = [
 export default function Navbar() {
     const pathname = usePathname()
     const [open, setOpen] = useState(false)
+    const [scrolled, setScrolled] = useState(false)
 
+    // Activo “inteligente”
     const isActive = (href: string) => {
         if (href === '/') return pathname === '/'
             if (href.startsWith('/#')) return pathname === '/'
                 return pathname.startsWith(href)
     }
 
+    // Efecto on-scroll: fondo más sólido + sombra
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 6)
+        onScroll()
+        window.addEventListener('scroll', onScroll, { passive: true })
+        return () => window.removeEventListener('scroll', onScroll)
+    }, [])
+
     return (
-        <nav className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur"
-        data-theme-border>
+        <nav
+        className={`sticky top-0 z-40 w-full border-b backdrop-blur transition-colors duration-300 ${
+            scrolled ? 'bg-white/95 shadow-md' : 'bg-white/80'
+        }`}
+        >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo + nombre */}
         <Link href="/" className="flex items-center gap-3" prefetch={false} aria-label="Ir al inicio">
@@ -40,7 +52,7 @@ export default function Navbar() {
         </span>
         </Link>
 
-        {/* Desktop */}
+        {/* Desktop links + Admin */}
         <div className="hidden items-center gap-2 md:flex">
         {links.map((l) => {
             const active = isActive(l.href)
@@ -55,6 +67,7 @@ export default function Navbar() {
                 } hover:bg-slate-50 focus-visible:bg-slate-50`}
                 >
                 <span className="relative z-10">{l.label}</span>
+                {/* Subrayado animado (activo visible + hover) */}
                 <span
                 aria-hidden
                 className={`pointer-events-none absolute -bottom-0.5 left-2 right-2 h-0.5 origin-left bg-current transition-transform duration-300 ${
@@ -65,14 +78,10 @@ export default function Navbar() {
             )
         })}
 
+        {/* Botón Admin */}
         <Link href="/admin" prefetch={false} className="btn-secondary ml-2">
         Admin
         </Link>
-
-        {/* Toggle tema */}
-        <div className="ml-2">
-        <ThemeToggle />
-        </div>
         </div>
 
         {/* Mobile button */}
@@ -109,17 +118,14 @@ export default function Navbar() {
                 )
             })}
 
-            <div className="mt-2 flex items-center justify-between">
             <Link
             href="/admin"
             prefetch={false}
-            className="btn-secondary"
+            className="btn-secondary mt-2"
             onClick={() => setOpen(false)}
             >
             Admin
             </Link>
-            <ThemeToggle />
-            </div>
             </div>
             </div>
         )}

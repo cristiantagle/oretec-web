@@ -20,7 +20,7 @@ export default function CoursesPage() {
     try {
       const ts = Date.now()
       const r = await fetch(`/api/public/courses?ts=${ts}&n=${nonce}`, { cache: 'no-store' })
-      if (!r.ok) throw new Error(await r.text().catch(() => `HTTP ${r.status}`))
+      if (!r.ok) throw new Error((await r.text().catch(() => null)) || `HTTP ${r.status}`)
         const data = await r.json()
         if (!Array.isArray(data)) throw new Error('Respuesta del API no es un arreglo')
           setCourses(data)
@@ -51,7 +51,8 @@ export default function CoursesPage() {
     if (v == null) return null
       if (typeof v === 'number' && Number.isFinite(v)) return Math.round(v)
         if (typeof v === 'string') {
-          const m = v.match(/(\d{1,3})/); if (m) return parseInt(m[1], 10)
+          const m = v.match(/(\d{1,3})/)
+          if (m) return parseInt(m[1], 10)
         }
         return null
   }
@@ -126,7 +127,11 @@ export default function CoursesPage() {
       ))}
       </div>
     ) : error ? (
-      <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div
+      className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+      role="alert"
+      aria-live="polite"
+      >
       {error}
       </div>
     ) : (

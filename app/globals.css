@@ -2,57 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* =========================
- *  Variables de tema (light)
- *  ========================= */
 :root {
   --brand: #1E3A8A;
   --gray-dark: #374151;
   --gray-light: #E5E7EB;
-
-  --bg: #ffffff;
-  --text: #0f172a; /* slate-900 */
-  --muted: #475569; /* slate-600 */
-  --card-bg: #ffffff;
-  --card-border: #e5e7eb; /* slate-200 */
-  --link: #1d4ed8; /* blue-700 */
-  --link-hover: #1e40af; /* blue-800 */
-  --ring: rgba(30,58,138,.35);
 }
 
-/* =========================
- *  Variables de tema (dark)
- *  ========================= */
-html[data-theme="dark"] {
-  --bg: #0b1220;         /* azul muy oscuro */
-  --text: #e5e7eb;       /* slate-200 */
-  --muted: #94a3b8;      /* slate-400 */
-  --card-bg: #0f172a;    /* slate-900 */
-  --card-border: #1f2937;/* slate-800 */
-  --link: #60a5fa;       /* blue-400 */
-  --link-hover: #93c5fd; /* blue-300 */
-  --ring: rgba(96,165,250,.4);
-}
-
-/* Fondo degradé corporativo suave */
+/* Fondo degradé corporativo suave (úsa .bg-oret-gradient donde quieras) */
 .bg-oret-gradient {
   background: linear-gradient(180deg, #F8FAFF 0%, #EEF3FF 40%, #FFFFFF 100%);
-}
-html[data-theme="dark"] .bg-oret-gradient {
-  background: linear-gradient(180deg, #0b1220 0%, #0e1a2e 40%, #0b1220 100%);
 }
 
 /* === Utilidades de tarjeta === */
 .card {
-  @apply rounded-2xl border;
-  background-color: var(--card-bg);
-  border-color: var(--card-border);
+  @apply bg-white border border-slate-200 rounded-2xl;
 }
 .shadow-soft {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-}
-html[data-theme="dark"] .shadow-soft {
-  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.55);
 }
 
 /* Elevación/hover unificada para cards */
@@ -63,87 +29,67 @@ html[data-theme="dark"] .shadow-soft {
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
 }
-html[data-theme="dark"] .card-hover:hover {
-  box-shadow: 0 14px 36px rgba(2, 6, 23, 0.6);
-}
 
 /* === Chips === */
 .chip {
-  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  color: var(--text);
-  opacity: .92;
+  @apply inline-flex items-center gap-1.5
+  rounded-full border border-slate-200 bg-white
+  px-2.5 py-1 text-xs font-medium text-slate-700;
 }
 
-/* === Links corporativos === */
+/* === Links corporativos (para links sueltos) === */
 .link {
-  color: var(--link);
-  text-underline-offset: 2px;
-  transition: color .2s ease;
-}
-.link:hover {
-  color: var(--link-hover);
-  text-decoration: underline;
+  @apply text-blue-700 underline-offset-2 hover:underline transition;
 }
 
-/* Subrayado animado sutil */
+/* Subrayado animado sutil (navbar, footer, etc.) */
 .link-anim {
-  @apply relative inline-block transition-colors duration-200;
-  color: var(--text);
-  opacity: .9;
+  @apply relative inline-block text-slate-700 transition-colors duration-200;
 }
 .link-anim::after {
   content: '';
-  @apply absolute left-0 bottom-0 h-[2px] w-0 transition-all duration-300;
-  background: var(--link);
+  @apply absolute left-0 bottom-0 h-[2px] w-0 bg-blue-700 transition-all duration-300;
 }
 .link-anim:hover {
-  color: var(--link);
+  @apply text-blue-800;
 }
 .link-anim:hover::after {
   @apply w-full;
 }
 
-/* Botones de redes */
+/* === Botones de redes (footer) === */
 .social-btn {
-  @apply inline-flex h-9 w-9 items-center justify-center rounded-full border transition-colors duration-300;
-  background-color: var(--card-bg);
-  border-color: var(--card-border);
-  color: var(--text);
+  @apply inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300
+  transition-colors duration-300;
 }
 .social-btn:hover {
-  background-color: rgba(37,99,235,0.08);
-  border-color: #2563eb;
-  color: #2563eb;
+  @apply bg-blue-50 border-blue-600 text-blue-700;
 }
 
 /* Botón flotante “volver arriba” */
 .scrolltop {
-  @apply fixed bottom-5 right-5 z-40 rounded-full border shadow-sm h-11 w-11 flex items-center justify-center transition;
-  background-color: var(--card-bg);
-  border-color: var(--card-border);
-}
-.scrolltop:hover {
-  transform: scale(1.05);
-  background-color: rgba(37,99,235,0.08);
+  @apply fixed bottom-5 right-5 z-40 rounded-full border border-slate-200 bg-white
+  shadow-sm h-11 w-11 flex items-center justify-center
+  transition hover:scale-105 hover:bg-blue-50;
 }
 
-/* Focus ring accesible unificado */
+/* === Focus ring accesible unificado === */
 :where(a, button, input, select, textarea, .btn-primary, .btn-secondary, .btn-danger, .card, .card-hover):focus-visible {
   outline: 2px solid transparent;
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px var(--ring);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.35);
   border-radius: 12px;
 }
 
 /* ============================
  *  BOTONES CORPORATIVOS ORETEC
+ *  (gradientes + hover + active + ripple)
  *  ============================ */
 
-/* Primario */
+/* Primario (llenado con gradiente azul) */
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-white transition duration-300 ease-in-out;
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-white
+  transition duration-300 ease-in-out;
   background-image: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
 }
 .btn-primary:hover {
@@ -154,22 +100,19 @@ html[data-theme="dark"] .card-hover:hover {
   transform: translateY(0) scale(0.97);
 }
 
-/* Secundario (borde degradado) */
+/* Secundario (borde degradado, interior blanco) */
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition duration-300 ease-in-out;
-  color: #1E3A8A;
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-blue-700
+  transition duration-300 ease-in-out;
   background:
-  linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+  linear-gradient(white, white) padding-box,
   linear-gradient(135deg, #1E3A8A, #2563EB) border-box;
   border: 1px solid transparent;
 }
-html[data-theme="dark"] .btn-secondary {
-  color: #93c5fd; /* blue-300 */
-}
 .btn-secondary:hover {
-  color: #1e40af;
+  @apply text-blue-800;
   background:
-  linear-gradient(color-mix(in srgb, var(--card-bg), white 6%), color-mix(in srgb, var(--card-bg), white 6%)) padding-box,
+  linear-gradient(#F9FBFF, #F9FBFF) padding-box,
   linear-gradient(135deg, #2563EB, #1E3A8A) border-box;
   transform: translateY(-1px) scale(1.04);
 }
@@ -177,22 +120,19 @@ html[data-theme="dark"] .btn-secondary {
   transform: translateY(0) scale(0.97);
 }
 
-/* Peligro */
+/* Peligro (borde degradado rojo) */
 .btn-danger {
-  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition duration-300 ease-in-out;
-  color: #dc2626;
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-red-600
+  transition duration-300 ease-in-out;
   background:
-  linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+  linear-gradient(white, white) padding-box,
   linear-gradient(135deg, #dc2626, #ef4444) border-box;
   border: 1px solid transparent;
 }
-html[data-theme="dark"] .btn-danger {
-  color: #fca5a5;
-}
 .btn-danger:hover {
-  color: #b91c1c;
+  @apply text-red-700;
   background:
-  linear-gradient(color-mix(in srgb, var(--card-bg), white 4%), color-mix(in srgb, var(--card-bg), white 4%)) padding-box,
+  linear-gradient(#FFF5F5, #FFF5F5) padding-box,
   linear-gradient(135deg, #ef4444, #dc2626) border-box;
   transform: translateY(-1px) scale(1.04);
 }
@@ -200,7 +140,7 @@ html[data-theme="dark"] .btn-danger {
   transform: translateY(0) scale(0.97);
 }
 
-/* Micro-interacción: Ripple + Glow */
+/* Ripple + glow */
 .btn-primary,
 .btn-secondary,
 .btn-danger {
@@ -214,24 +154,33 @@ html[data-theme="dark"] .btn-danger {
 .btn-danger::after {
   content: '';
   position: absolute;
-  left: 50%; top: 50%;
-  width: 0; height: 0; opacity: 0;
+  left: 50%;
+  top: 50%;
+  width: 0; height: 0;
+  opacity: 0;
   pointer-events: none;
   background: radial-gradient(circle, rgba(255,255,255,.35) 10%, transparent 10.01%);
   transform: translate(-50%, -50%);
   transition: width .45s ease, height .45s ease, opacity .8s;
-  border-radius: 9999px; z-index: 0;
+  border-radius: 9999px;
+  z-index: 0;
 }
 .btn-primary:active::after,
 .btn-secondary:active::after,
 .btn-danger:active::after {
-  width: 220%; height: 220%; opacity: 1;
+  width: 220%;
+  height: 220%;
+  opacity: 1;
 }
 .btn-primary:hover { box-shadow: 0 10px 24px rgba(30, 58, 138, 0.18); }
 .btn-secondary:hover { box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12); }
 .btn-danger:hover { box-shadow: 0 10px 24px rgba(220, 38, 38, 0.14); }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn-primary, .btn-secondary, .btn-danger { transition: none; }
-  .btn-primary::after, .btn-secondary::after, .btn-danger::after { transition: none; }
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger { transition: none; }
+  .btn-primary::after,
+  .btn-secondary::after,
+  .btn-danger::after { transition: none; }
 }
