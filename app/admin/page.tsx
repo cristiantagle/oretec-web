@@ -39,7 +39,7 @@ export default function AdminPage() {
     if (!confirm('¿Aprobar y matricular?')) return
       await fetch('/api/admin/orders/approve', {
         method: 'POST',
-        headers:{'Content-Type':'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: id })
       })
       await load()
@@ -49,7 +49,7 @@ export default function AdminPage() {
     const note = prompt('Motivo de rechazo:') || ''
     await fetch('/api/admin/orders/reject', {
       method: 'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId: id, note })
     })
     await load()
@@ -69,14 +69,19 @@ export default function AdminPage() {
     Panel Admin — Órdenes
     </h1>
 
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3">
     <Link href="/admin/courses" className="btn-primary">
     Gestionar cursos
     </Link>
 
-    {/* NUEVO: botón para testimonios */}
+    {/* Testimonios */}
     <Link href="/admin/testimonials" className="btn-secondary">
     Gestionar testimonios
+    </Link>
+
+    {/* NUEVO: Contactos (formulario público guardado en DB) */}
+    <Link href="/admin/contacts" className="btn-secondary">
+    Gestionar contactos
     </Link>
 
     {/* Logout por POST a /api/admin/logout */}

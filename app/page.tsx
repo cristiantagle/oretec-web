@@ -1,4 +1,5 @@
 // app/page.tsx
+import Link from 'next/link'
 import HeroElearn from '@/components/HeroElearn'
 import LogosStrip from '@/components/LogosStrip'
 import FeatureCards from '@/components/FeatureCards'
@@ -62,6 +63,26 @@ export default function HomePage() {
     <div className="py-6">
     <BannerStrip />
     </div>
+
+    {/* Mini-CTA hacia Contacto (nuevo) */}
+    <section className="mx-auto max-w-6xl px-4">
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+    <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+    <h3 className="text-base font-semibold text-slate-900">
+    ¿Tienes dudas o necesitas una cotización rápida?
+    </h3>
+    <p className="mt-1 text-sm text-slate-600">
+    Conversemos y armamos el plan de formación que necesitas.
+    </p>
+    </div>
+    <div className="flex gap-2">
+    <Link href="/contact" className="btn-primary">Ir a Contacto</Link>
+    <a href="mailto:contacto@oretec.cl" className="btn-secondary">Escríbenos</a>
+    </div>
+    </div>
+    </div>
+    </section>
 
     {/* Brillo sutil antes de testimonios */}
     <GlowBreak />

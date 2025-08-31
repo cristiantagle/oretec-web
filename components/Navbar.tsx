@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react'
 const links = [
     { href: '/', label: 'Inicio' },
 { href: '/courses', label: 'Cursos' },
-{ href: '/#contacto', label: 'Contacto' },
+// ahora a la página separada de contacto
+{ href: '/contact', label: 'Contacto' },
 ]
 
 export default function Navbar() {
@@ -18,8 +19,7 @@ export default function Navbar() {
     // Activo “inteligente”
     const isActive = (href: string) => {
         if (href === '/') return pathname === '/'
-            if (href.startsWith('/#')) return pathname === '/'
-                return pathname.startsWith(href)
+            return pathname.startsWith(href)
     }
 
     // Efecto on-scroll: fondo más sólido + sombra
