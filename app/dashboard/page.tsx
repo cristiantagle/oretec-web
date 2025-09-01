@@ -29,14 +29,14 @@ export default function DashboardPage() {
                 const u = session?.user
                 if (!u) {
                     setLoading(false)
-                    router.replace('/login') // IMPORTANTE: /login (sin (auth) en la URL)
+                    router.replace('/login') // ruta estable /login (segment group (auth) no afecta la URL)
     return
                 }
 
                 setUser({
                     id: u.id,
-                    email: u.email,
-                    full_name: (u.user_metadata?.full_name as string) || null,
+                    email: u.email ?? null,
+                    full_name: (u.user_metadata?.full_name as string | undefined) ?? null,
                 })
                 setLoading(false)
         }
@@ -52,14 +52,19 @@ export default function DashboardPage() {
             }
             setUser({
                 id: u.id,
-                email: u.email,
-                full_name: (u.user_metadata?.full_name as string) || null,
+                email: u.email ?? null,
+                full_name: (u.user_metadata?.full_name as string | undefined) ?? null,
             })
         })
 
         return () => {
             mounted = false
-            sub.subscription.unsubscribe()
+            // en SDKs recientes viene como sub.subscription.unsubscribe()
+            // pero por seguridad comprobamos ambas formas
+            // @ts-expect-error - compat distintas versiones
+            sub?.subscription?.unsubscribe?.()
+            // @ts-expect-error - compat
+            sub?.unsubscribe?.()
         }
     }, [router, supabase])
 
