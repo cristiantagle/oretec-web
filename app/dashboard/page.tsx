@@ -1,3 +1,4 @@
+// app/dashboard/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -29,21 +30,22 @@ export default function DashboardPage() {
                 const u = session?.user
                 if (!u) {
                     setLoading(false)
-                    router.replace('/login') // ruta estable /login (segment group (auth) no afecta la URL)
+                    router.replace('/login') // /login es la ruta estable (independiente del (auth) group)
     return
                 }
 
                 setUser({
                     id: u.id,
                     email: u.email ?? null,
-                    full_name: (u.user_metadata?.full_name as string | undefined) ?? null,
+                    full_name: (u.user_metadata?.full_name as string) || null,
                 })
                 setLoading(false)
         }
 
         prime()
 
-        const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+        // Suscripción a cambios de auth (login/logout)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             const u = session?.user
             if (!u) {
                 setUser(null)
@@ -53,18 +55,14 @@ export default function DashboardPage() {
             setUser({
                 id: u.id,
                 email: u.email ?? null,
-                full_name: (u.user_metadata?.full_name as string | undefined) ?? null,
+                full_name: (u.user_metadata?.full_name as string) || null,
             })
         })
 
         return () => {
             mounted = false
-            // en SDKs recientes viene como sub.subscription.unsubscribe()
-            // pero por seguridad comprobamos ambas formas
-            // @ts-expect-error - compat distintas versiones
-            sub?.subscription?.unsubscribe?.()
-            // @ts-expect-error - compat
-            sub?.unsubscribe?.()
+            // En SDK v2 siempre existe .unsubscribe()
+            subscription.unsubscribe()
         }
     }, [router, supabase])
 
