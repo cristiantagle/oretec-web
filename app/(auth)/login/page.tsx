@@ -1,13 +1,13 @@
 // app/(auth)/login/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import SectionTitle from '@/components/SectionTitle'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 
-export default function LoginPage() {
+function LoginInner() {
     const router = useRouter()
     const params = useSearchParams()
     const supabase = supabaseBrowser()
@@ -40,7 +40,6 @@ export default function LoginPage() {
     function validate(): string | null {
         const mail = email.trim()
         if (!mail) return 'Ingresa tu correo'
-            // validación rápida
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return 'Correo inválido'
                 if (!password) return 'Ingresa tu contraseña'
                     if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres'
@@ -59,7 +58,6 @@ export default function LoginPage() {
                                                                      password,
             })
             if (error) {
-                // Mensajes más claros
                 if (error.message?.toLowerCase().includes('invalid login')) {
                     throw new Error('Correo o contraseña incorrectos')
                 }
@@ -154,5 +152,13 @@ export default function LoginPage() {
         ¿Olvidaste tu contraseña? Próximamente podrás recuperarla.
         </div>
         </main>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Cargando…</div>}>
+        <LoginInner />
+        </Suspense>
     )
 }

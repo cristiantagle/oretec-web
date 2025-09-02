@@ -1,6 +1,7 @@
+// app/(auth)/register/page.tsx
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import SectionTitle from '@/components/SectionTitle'
@@ -8,7 +9,7 @@ import { supabaseBrowser } from '@/lib/supabase/browser'
 
 type AccountType = 'individual' | 'company'
 
-export default function RegisterPage() {
+function RegisterInner() {
     const router = useRouter()
     const search = useSearchParams()
     const supabase = supabaseBrowser()
@@ -191,5 +192,13 @@ export default function RegisterPage() {
         </div>
         </div>
         </main>
+    )
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div>Cargando…</div>}>
+        <RegisterInner />
+        </Suspense>
     )
 }
