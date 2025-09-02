@@ -2,17 +2,19 @@
 import { supabaseServer } from '@/lib/supabase/server'
 
 /**
- * Devuelve cursos públicos desde la BD (sin mocks), normalizados para la UI:
+ * Devuelve cursos públicos desde BD (sin mocks), normalizados para la UI:
  * { id, title, code, hours, price_clp, description, buy_url, image_url, mp_links_by_qty, created_at, updated_at }
  *
- * Lee con select('*') y tolera nombres alternativos de campos.
+ * Por defecto NO filtra por flags. Si agregas ?onlyPublished=1 filtra por published/is_active/visible === true.
  */
-export async function GET() {
+export async function GET(req: Request) {
   const db = supabaseServer()
 
-  // Traemos todo y normalizamos en memoria (evita dolores con columnas opcionales).
+  const { searchParams } = new URL(req.url)
+  const onlyPublished = searchParams.get('onlyPublished') === '1'
+
   const { data, error } = await db
-  .from('courses')            // 👈 ajusta el nombre de la tabla si es distinto
+  .from('courses') // 👈 ajusta si tu tabla se llama distinto
   .select('*')
   .order('updated_at', { ascending: false })
 
@@ -61,13 +63,8 @@ export async function GET() {
         return null
   }
 
-  const normalized = rows
-  // Si tienes flags de visibilidad, los respetamos si existen
-  .filter((r: any) => {
-    const flags = [r.published, r.is_active, r.visible].filter(v => typeof v === 'boolean')
-    return flags.length ? flags.every(Boolean) : true
-  })
-  .map((r: any) => {
+  // Normalización
+  let normalized = rows.map((r: any) => {
     const title = firstOf(r, ['title', 'course_title', 'name', 'nombre', 'titulo']) ?? 'Curso'
   const code = firstOf(r, ['code', 'course_code', 'sku', 'slug', 'codigo'])
   const hours = toHours(firstOf(r, ['hours', 'duration_hours', 'duration', 'duracion', 'hrs']))
@@ -88,9 +85,23 @@ export async function GET() {
     mp_links_by_qty: r.mp_links_by_qty ?? null,
     created_at: r.created_at ?? null,
     updated_at: r.updated_at ?? null,
-    _raw: r, // por si luego quieres algo extra en la tarjeta
+    // flags crudos por si luego los quieres usar
+    published: typeof r.published === 'boolean' ? r.published : undefined,
+    is_active: typeof r.is_active === 'boolean' ? r.is_active : undefined,
+    visible: typeof r.visible === 'boolean' ? r.visible : undefined,
   }
   })
+
+  // Filtro opcional por flags (solo si se pide)
+  if (onlyPublished) {
+    normalized = normalized.filter((r: any) => {
+      const flags: boolean[] = []
+      if (typeof r.published === 'boolean') flags.push(r.published)
+        if (typeof r.is_active === 'boolean') flags.push(r.is_active)
+          if (typeof r.visible === 'boolean') flags.push(r.visible)
+            return flags.length ? flags.every(Boolean) : true
+    })
+  }
 
   return Response.json(normalized)
 }

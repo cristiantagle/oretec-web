@@ -1,8 +1,3 @@
-#!/usr/bin/env fish
-# Reescribe publish-course.ts para actualizar solo columnas existentes
-
-bash -lc '
-cat > scripts/publish-course.ts << "TS"
 // Publicar/activar un curso por id o code, actualizando SOLO columnas existentes
 import fs from "fs";
 import path from "path";
@@ -15,11 +10,11 @@ import { createClient } from "@supabase/supabase-js";
   if (fs.existsSync(f)) {
     const txt = fs.readFileSync(f, "utf8");
     for (const line of txt.split(/\r?\n/)) {
-      const m = line.match(/^\\s*([A-Z0-9_]+)\\s*=\\s*(.*)\\s*$/);
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
       if (!m) continue;
       const k = m[1];
       let v = m[2];
-      if ((v.startsWith("\\"") && v.endsWith("\\"")) || (v.startsWith("\'") && v.endsWith("\'"))) {
+      if ((v.startsWith("\"") && v.endsWith("\"")) || (v.startsWith("'") && v.endsWith("'"))) {
         v = v.slice(1, -1);
       }
       if (!process.env[k]) process.env[k] = v;
@@ -101,6 +96,3 @@ async function main() {
   });
 }
 main();
-TS
-echo "✓ scripts/publish-course.ts actualizado"
-'
