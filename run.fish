@@ -1,35 +1,95 @@
 #!/usr/bin/env fish
-# Crea SOLO app/admin/layout.tsx si no existe (heredoc via bash para evitar conflictos de fish)
-
-set -l FILE app/admin/layout.tsx
-if test -f $FILE
-  echo "Ya existía: $FILE"
-  exit 0
-end
-
-mkdir -p (dirname $FILE)
+# Crea SOLO archivos nuevos para links directos de Mercado Pago
+# Usamos Python para escribir archivos y evitar expansiones de shell.
 
 bash -lc '
-cat > app/admin/layout.tsx << "TS"
-// app/admin/layout.tsx
-import type { ReactNode } from "react"
+set -e
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+python3 - << "PY"
+from pathlib import Path
+
+# 1) lib/catalog.ts — catálogo con tus links de MP
+catalog_ts = """export type CatalogItem = {
+  sku: string
+  title: string
+  priceCLP: number
+  mpUrl: string // Link directo de Mercado Pago (preference / link de pago)
+  description?: string
+}
+
+export const catalog: CatalogItem[] = [
+  // ⚠️ Reemplaza los mpUrl por tus links reales de MP:
+  {
+    sku: "curso_basico",
+    title: "Curso Básico de Seguridad",
+    priceCLP: 19990,
+    mpUrl: "https://mpago.la/xxxxx",
+    description: "Introducción a prevención y seguridad laboral."
+  },
+  {
+    sku: "curso_avanzado",
+    title: "Curso Avanzado de Seguridad",
+    priceCLP: 49990,
+    mpUrl: "https://mpago.la/yyyyy",
+    description: "Contenidos avanzados, normativa y casos."
+  }
+]
+
+// Helper
+export function getItemBySku(sku: string) {
+  return catalog.find(c => c.sku === sku) || null
+}
+"""
+
+# 2) components/BuyWithMercadoPago.tsx — botón que abre el link
+buy_btn_tsx = """\\"use client\\"
+
+import { getItemBySku } from \\"@/lib/catalog\\"
+
+export default function BuyWithMercadoPago({ sku, label }: { sku: string; label?: string }) {
+  const item = getItemBySku(sku)
+  if (!item) {
+    return (
+      <button
+        className=\\"rounded bg-gray-300 px-4 py-2 text-gray-600 cursor-not-allowed\\"
+        title=\\"Producto no disponible\\"
+        disabled
+      >
+        No disponible
+      </button>
+    )
+  }
+
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold" style={{ color: "#1E3A8A" }}>
-          Panel de Administración
-        </h1>
-        <p className="text-slate-600 text-sm">
-          Gestión de usuarios y privilegios.
-        </p>
-      </header>
-      {children}
-    </section>
+    <a
+      href={item.mpUrl}
+      target=\\"_blank\\"
+      rel=\\"noopener noreferrer\\"
+      className=\\"inline-flex items-center rounded-lg bg-blue-900 px-4 py-2 text-white shadow hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300\\"
+      title={\`Pagar \${item.title} en Mercado Pago\`}
+    >
+      {label ?? \\"Comprar\\"} · $\${item.priceCLP.toLocaleString(\\"es-CL\\")}
+    </a>
   )
 }
-TS
-'
+"""
 
-echo "✓ Creado: $FILE"
+# Crear carpetas si no existen
+Path("lib").mkdir(parents=True, exist_ok=True)
+Path("components").mkdir(parents=True, exist_ok=True)
+
+# Escribir archivos solo si NO existen
+def write_if_missing(path: str, content: str):
+    p = Path(path)
+    if p.exists():
+        print(f"Ya existía: {path}")
+    else:
+        p.write_text(content, encoding="utf-8")
+        print(f"✓ Creado: {path}")
+
+write_if_missing("lib/catalog.ts", catalog_ts)
+write_if_missing("components/BuyWithMercadoPago.tsx", buy_btn_tsx)
+
+print("Listo. Recuerda reemplazar los mpUrl por tus links reales de Mercado Pago en lib/catalog.ts")
+PY
+'
