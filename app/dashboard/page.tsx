@@ -240,14 +240,24 @@ export default function DashboardPage() {
         </div>
         </section>
 
-        {/* Botón Editar */}
-        <div className="mx-auto mt-5 max-w-2xl">
+        {/* Acciones bajo la tarjeta */}
+        <div className="mx-auto mt-5 flex max-w-2xl flex-wrap items-center gap-3">
         <Link
         href="/dashboard/profile"
         className="inline-flex items-center rounded-lg bg-blue-900 px-4 py-2 text-white shadow hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
         >
         Editar información
         </Link>
+
+        {/* Botón visible solo si es admin */}
+        {profile?.account_type === 'admin' && (
+            <Link
+            href="/admin/users"
+            className="inline-flex items-center rounded-lg border border-blue-300 bg-white px-4 py-2 text-blue-900 shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            >
+            Administrar usuarios
+            </Link>
+        )}
         </div>
 
         {!loading && error && (
