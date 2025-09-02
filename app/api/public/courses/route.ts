@@ -1,103 +1,96 @@
-import { NextResponse } from 'next/server'
+// app/api/public/courses/route.ts
 import { supabaseServer } from '@/lib/supabase/server'
 
-export const dynamic = 'force-dynamic'
-
-function isPublished(v: any) {
-  return v === true || v === 'true' || v === 1 || v === '1'
-}
-
-function nocache() {
-  return {
-    'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
-    'CDN-Cache-Control': 'no-store',
-    'Vercel-CDN-Cache-Control': 'no-store',
-  }
-}
-
 /**
- * ⚠️ Parche temporal anti-fantasmas
- * Quita PRLL2 de la salida pública mientras investigamos la causa raíz.
- * Puedes quitar este bloque cuando verifique que la DB quedó consistente.
+ * Devuelve cursos públicos desde la BD (sin mocks), normalizados para la UI:
+ * { id, title, code, hours, price_clp, description, buy_url, image_url, mp_links_by_qty, created_at, updated_at }
+ *
+ * Lee con select('*') y tolera nombres alternativos de campos.
  */
-const BLACKLIST = {
-  ids:   new Set<string>(['7b677037-63d0-434e-9e53-b6f4492a8dbc']),
-  slugs: new Set<string>(['prll2']),
-  codes: new Set<string>(['PRLL2']),
-}
+export async function GET() {
+  const db = supabaseServer()
 
-export async function GET(req: Request) {
-  const url = new URL(req.url)
-  const debug = url.searchParams.get('debug') === '1'
+  // Traemos todo y normalizamos en memoria (evita dolores con columnas opcionales).
+  const { data, error } = await db
+  .from('courses')            // 👈 ajusta el nombre de la tabla si es distinto
+  .select('*')
+  .order('updated_at', { ascending: false })
 
-  try {
-    const sb = supabaseServer()
-    const { data, error } = await sb
-    .from('courses')
-    .select('id, code, slug, title, description, price_cents, hours, level, mp_link, published')
-    .order('title', { ascending: true })
-
-    if (error) {
-      return NextResponse.json(
-        debug ? { error: 'DB error', detail: String(error.message || error) } : { error: 'DB error' },
-                               { status: 500, headers: nocache() }
-      )
-    }
-
-    const onlyPublished = (data ?? []).filter((c: any) => isPublished(c?.published))
-
-    // Parche: esconder fantasma por id/slug/code
-    const sanitized = onlyPublished.filter((c: any) => {
-      const id   = String(c?.id ?? '')
-      const slug = String(c?.slug ?? '').toLowerCase().trim()
-      const code = String(c?.code ?? '').trim()
-      if (BLACKLIST.ids.has(id)) return false
-        if (BLACKLIST.slugs.has(slug)) return false
-          if (BLACKLIST.codes.has(code)) return false
-            return true
-    })
-
-    const normalized = sanitized.map((c: any) => ({
-      id: c.id,
-      code: c.code,
-      slug: c.slug,
-      title: c.title,
-      description: c.description,
-      hours: typeof c.hours === 'number' ? c.hours : null,
-      price_cents: typeof c.price_cents === 'number' ? c.price_cents : null, // PESOS
-      price: typeof c.price_cents === 'number' ? c.price_cents : null,
-      level: c.level,
-      mercado_pago_url: c.mp_link || null,
-      url: c.mp_link || null,
-      published: c.published,
-    }))
-
-    // En modo debug te doy info adicional para comparar con /api/admin/courses/dump
-    if (debug) {
-      const rawIds = (data ?? []).map((r: any) => r?.id)
-      const publicIds = normalized.map((r: any) => r?.id)
-      return NextResponse.json(
-        {
-          debug: true,
-          raw_count: data?.length ?? 0,
-          raw_ids: rawIds,
-          published_count: onlyPublished.length,
-          public_count: normalized.length,
-            public_ids: publicIds,
-              note: 'Blacklist temporal aplicado si coincidía.',
-        },
-        { headers: { ...nocache(), 'Content-Type': 'application/json' } }
-      )
-    }
-
-    return new NextResponse(JSON.stringify(normalized), {
-      status: 200,
-      headers: { ...nocache(), 'Content-Type': 'application/json' },
-    })
-  } catch (e: any) {
-    return NextResponse.json(
-      debug ? { error: 'Internal error', detail: String(e?.message || e) } : { error: 'Internal error' },
-                             { status: 500, headers: nocache() }
+  if (error) {
+    return new Response(
+      JSON.stringify({ error: 'db_error', detail: error.message }),
+                        { status: 500 },
     )
   }
+
+  const rows = Array.isArray(data) ? data : []
+
+  // Helpers
+  const firstOf = (obj: any, keys: string[]): any => {
+    for (const k of keys) {
+      if (!obj) continue
+        if (k.includes('->')) {
+          // JSON path simple: links->buy
+          const [root, sub] = k.split('->')
+          const v = obj?.[root]?.[sub]
+          if (v != null) return v
+        } else if (k in obj && obj[k] != null) {
+          return obj[k]
+        }
+    }
+    return null
+  }
+  const toHours = (v: any): number | null => {
+    if (v == null) return null
+      if (typeof v === 'number' && Number.isFinite(v)) return Math.round(v)
+        if (typeof v === 'string') {
+          const m = v.match(/(\d{1,3})/)
+          if (m) return parseInt(m[1], 10)
+        }
+        return null
+  }
+  const toPriceCLP = (v: any): number | null => {
+    if (v == null) return null
+      if (typeof v === 'number') return Math.round(v)
+        if (typeof v === 'string') {
+          const digits = v.replace(/[^\d]/g, '')
+          if (!digits) return null
+            const n = parseInt(digits, 10)
+            return Number.isFinite(n) ? n : null
+        }
+        return null
+  }
+
+  const normalized = rows
+  // Si tienes flags de visibilidad, los respetamos si existen
+  .filter((r: any) => {
+    const flags = [r.published, r.is_active, r.visible].filter(v => typeof v === 'boolean')
+    return flags.length ? flags.every(Boolean) : true
+  })
+  .map((r: any) => {
+    const title = firstOf(r, ['title', 'course_title', 'name', 'nombre', 'titulo']) ?? 'Curso'
+  const code = firstOf(r, ['code', 'course_code', 'sku', 'slug', 'codigo'])
+  const hours = toHours(firstOf(r, ['hours', 'duration_hours', 'duration', 'duracion', 'hrs']))
+  const price_clp = toPriceCLP(firstOf(r, ['price_clp', 'price', 'price_cents']))
+  const description = firstOf(r, ['description', 'summary', 'desc', 'descripcion', 'resumen'])
+  const buy_url = firstOf(r, ['buy_url', 'mp_url', 'mp_link', 'payment_link', 'checkout_url', 'links->buy', 'links->checkout'])
+  const image_url = firstOf(r, ['image_url', 'cover', 'thumbnail'])
+
+  return {
+    id: r.id,
+    title,
+    code,
+    hours,
+    price_clp,
+    description,
+    buy_url,
+    image_url,
+    mp_links_by_qty: r.mp_links_by_qty ?? null,
+    created_at: r.created_at ?? null,
+    updated_at: r.updated_at ?? null,
+    _raw: r, // por si luego quieres algo extra en la tarjeta
+  }
+  })
+
+  return Response.json(normalized)
 }
