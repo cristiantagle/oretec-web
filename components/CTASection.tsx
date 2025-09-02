@@ -17,9 +17,25 @@ export default function CTASection() {
         <p className="relative mt-3 text-blue-100 max-w-xl mx-auto">
         Diseñamos planes de formación a medida para cumplir con normativa y metas internas.
         </p>
+
         <div className="relative mt-6 flex flex-wrap justify-center gap-4">
         <Link href="/courses" className="btn-primary">Ver catálogo</Link>
         <a href="mailto:contacto@oretec.cl" className="btn-secondary bg-white/90 backdrop-blur">Escríbenos</a>
+        </div>
+
+        {/* Línea de acceso Auth */}
+        <div className="relative mt-6 text-sm text-blue-100">
+        ¿Ya tienes cuenta?{' '}
+        <Link href="/login" className="underline underline-offset-2 hover:opacity-90">Ingresar</Link>
+        {'  '}·{'  '}
+        ¿Nuevo aquí?{' '}
+        <Link href="/register" className="underline underline-offset-2 hover:opacity-90">Crear cuenta</Link>
+        </div>
+
+        {/* Accesos directos por tipo */}
+        <div className="relative mt-3 flex flex-wrap justify-center gap-2">
+        <Link href="/register?type=individual" className="chip bg-white/90 text-slate-800">Particular</Link>
+        <Link href="/register?type=company" className="chip bg-white/90 text-slate-800">Empresa</Link>
         </div>
         </motion.div>
     )

@@ -1,0 +1,76 @@
+import { createClient } from '@supabase/supabase-js'
+
+export async function POST(req: Request) {
+  try {
+    // 1) Obtener Bearer token desde la sesión del cliente (enviado por ensure-client o desde tu app)
+    const authHeader =
+    req.headers.get('authorization') || req.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'missing_bearer' }), { status: 401 })
+    }
+    const token = authHeader.slice('Bearer '.length)
+
+    // 2) Cliente Supabase "como el usuario" (usar anon key + Authorization del usuario)
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !anon) {
+      return new Response(JSON.stringify({ error: 'missing_supabase_env' }), { status: 500 })
+    }
+    const supabase = createClient(url, anon, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+
+    // 3) Leer al usuario autenticado
+    const { data: userData, error: userErr } = await supabase.auth.getUser()
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'invalid_session' }), { status: 401 })
+    }
+    const u = userData.user
+
+    // 4) Ensamblar datos para profiles
+    const email =
+    u.email ||
+    (u.user_metadata?.email as string | undefined) ||
+    null
+    if (!email) {
+      // Si no hay email, avisamos explícitamente (evita violar NOT NULL)
+      return new Response(JSON.stringify({ error: 'no_email_in_session' }), { status: 400 })
+    }
+
+    const full_name =
+    (u.user_metadata?.full_name as string | undefined) || null
+    const account_type =
+    (u.user_metadata?.account_type as 'individual' | 'company' | undefined) || 'individual'
+    const company_name =
+    (u.user_metadata?.company_name as string | undefined) || null
+
+    // 5) Upsert por id
+    const payload = {
+      id: u.id,
+      email,
+      full_name,
+      account_type,
+      company_name,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { error: upsertErr } = await supabase
+    .from('profiles')
+    .upsert(payload, { onConflict: 'id' })
+
+    if (upsertErr) {
+      return new Response(
+        JSON.stringify({ error: 'DB error (upsert)', detail: upsertErr.message }),
+                          { status: 500 },
+      )
+    }
+
+    return Response.json({ ok: true })
+  } catch (e: any) {
+    return new Response(
+      JSON.stringify({ error: 'unexpected', detail: e?.message || String(e) }),
+                        { status: 500 },
+    )
+  }
+}

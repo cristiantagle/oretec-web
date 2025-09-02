@@ -52,7 +52,7 @@ export default function Navbar() {
         </span>
         </Link>
 
-        {/* Desktop links + Admin */}
+        {/* Desktop links + Auth + Admin */}
         <div className="hidden items-center gap-2 md:flex">
         {links.map((l) => {
             const active = isActive(l.href)
@@ -78,7 +78,18 @@ export default function Navbar() {
             )
         })}
 
-        {/* Botón Admin */}
+        {/* Divider sutil */}
+        <span className="mx-2 h-5 w-px bg-slate-200" aria-hidden />
+
+        {/* Auth */}
+        <Link href="/login" prefetch={false} className="btn-secondary">
+        Ingresar
+        </Link>
+        <Link href="/register" prefetch={false} className="btn-primary">
+        Crear cuenta
+        </Link>
+
+        {/* Admin */}
         <Link href="/admin" prefetch={false} className="btn-secondary ml-2">
         Admin
         </Link>
@@ -118,6 +129,27 @@ export default function Navbar() {
                 )
             })}
 
+            {/* Auth en mobile */}
+            <div className="mt-2 flex flex-col gap-2">
+            <Link
+            href="/login"
+            prefetch={false}
+            className="btn-secondary"
+            onClick={() => setOpen(false)}
+            >
+            Ingresar
+            </Link>
+            <Link
+            href="/register"
+            prefetch={false}
+            className="btn-primary"
+            onClick={() => setOpen(false)}
+            >
+            Crear cuenta
+            </Link>
+            </div>
+
+            {/* Admin */}
             <Link
             href="/admin"
             prefetch={false}

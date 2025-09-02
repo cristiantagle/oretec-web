@@ -22,11 +22,12 @@ export default function HeroElearn() {
 
         <FadeIn delay={0.05}>
         <p className="mt-4 max-w-xl text-slate-800">
-        Cursos online, prácticos y actualizados. Certifícate desde cualquier lugar y avanza en tu cumplimiento
-        normativo.
+        Cursos online, prácticos y actualizados. Certifícate desde cualquier lugar y avanza en tu
+        cumplimiento normativo.
         </p>
         </FadeIn>
 
+        {/* CTAs principales */}
         <FadeIn delay={0.1}>
         <div className="mt-6 flex flex-wrap gap-3">
         <Link href="/courses" className="btn-primary">Ver catálogo de cursos</Link>
@@ -34,7 +35,42 @@ export default function HeroElearn() {
         </div>
         </FadeIn>
 
-        <FadeIn delay={0.15}>
+        {/* Micro-barra de acceso */}
+        <FadeIn delay={0.18}>
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-soft">
+        {/* Fila superior */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-sm text-slate-700">
+        ¿Ya tienes cuenta?{' '}
+        <Link href="/login" className="link-anim">Ingresar</Link>
+        </span>
+        <span className="text-sm text-slate-700">
+        ¿Nuevo aquí?{' '}
+        <Link href="/register" className="link-anim">Crear cuenta</Link>
+        </span>
+        </div>
+
+        {/* Fila inferior centrada con iconos */}
+        <div className="mt-4 flex justify-center gap-3">
+        <Link
+        href="/register?type=individual"
+        className="btn-secondary !px-3 !py-1.5 text-sm flex items-center gap-2 hover:bg-blue-50 hover:text-blue-700"
+        >
+        <span className="text-lg">👤</span>
+        Particular
+        </Link>
+        <Link
+        href="/register?type=company"
+        className="btn-secondary !px-3 !py-1.5 text-sm flex items-center gap-2 hover:bg-emerald-50 hover:text-emerald-700"
+        >
+        <span className="text-lg">🏢</span>
+        Empresa
+        </Link>
+        </div>
+        </div>
+        </FadeIn>
+
+        <FadeIn delay={0.22}>
         <ul className="mt-6 flex flex-wrap gap-4 text-sm text-slate-700">
         <li>• 100% online</li>
         <li>• Certificación digital</li>
@@ -55,7 +91,6 @@ export default function HeroElearn() {
         sizes="(min-width: 768px) 520px, 100vw"
         className="rounded-3xl object-cover object-center"
         />
-        {/* Overlay para contraste */}
         <div
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-3xl"
@@ -66,19 +101,20 @@ export default function HeroElearn() {
         />
         </div>
 
-        {/* Halo sutil */}
-        <div className="pointer-events-none absolute -inset-[1px] rounded-[26px]" style={{ boxShadow: '0 0 0 1px rgba(30,58,138,0.08)' }} />
+        <div
+        className="pointer-events-none absolute -inset-[1px] rounded-[26px]"
+        style={{ boxShadow: '0 0 0 1px rgba(30,58,138,0.08)' }}
+        />
 
-        {/* Chips */}
-        <FadeIn delay={0.25}>
-        <div className="card absolute -bottom-4 -left-4 z-10 px-4 py-3 text-sm">
+        <FadeIn delay={0.28}>
+        <div className="card absolute left-3 top-3 z-10 px-3 py-2 text-xs sm:left-4 sm:top-4 sm:px-4 sm:py-3 sm:text-sm">
         <div className="font-medium text-slate-800">Cursos activos</div>
         <div className="text-slate-600">Catálogo actualizado — CLP</div>
         </div>
         </FadeIn>
 
-        <FadeIn delay={0.3}>
-        <div className="card absolute -top-4 -right-4 z-10 px-4 py-3 text-sm">
+        <FadeIn delay={0.33}>
+        <div className="card absolute bottom-3 right-3 z-10 px-3 py-2 text-xs sm:bottom-4 sm:right-4 sm:px-4 sm:py-3 sm:text-sm">
         <div className="font-medium text-slate-800">Certificación</div>
         <div className="text-slate-600">Descarga inmediata</div>
         </div>

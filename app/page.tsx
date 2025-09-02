@@ -40,6 +40,24 @@ export default function HomePage() {
     <LogosStrip />
     </section>
 
+    {/* Mini-banda Auth (nuevo) */}
+    <section className="mx-auto max-w-6xl px-4">
+    <div className="card shadow-soft p-5">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+    <h3 className="text-base font-semibold text-slate-900">Accede a tu cuenta</h3>
+    <p className="mt-1 text-sm text-slate-600">Compra cursos, revisa tu progreso y descarga certificados.</p>
+    </div>
+    <div className="flex flex-wrap gap-2">
+    <Link href="/login" className="btn-secondary">Ingresar</Link>
+    <Link href="/register" className="btn-primary">Crear cuenta</Link>
+    <Link href="/register?type=individual" className="chip">Particular</Link>
+    <Link href="/register?type=company" className="chip">Empresa</Link>
+    </div>
+    </div>
+    </div>
+    </section>
+
     {/* Métricas animadas */}
     <StatsBand />
 
