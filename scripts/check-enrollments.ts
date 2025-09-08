@@ -1,3 +1,4 @@
+import { Pool } from 'pg';
 import "./env";
 import { Client } from "pg";
 
@@ -39,7 +40,7 @@ import dns from "node:dns";
 import { Pool } from "pg";
 
 function createIPv4Pool(connStr: string) {
-  return createIPv4Pool({
+  return new Pool({
     connectionString: connStr,
     ssl: { rejectUnauthorized: false },
     // Fuerza A-record (IPv4) en la resolución DNS
