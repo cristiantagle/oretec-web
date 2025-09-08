@@ -8,7 +8,7 @@ export default function PreviewBadge() {
   useEffect(() => {
     fetch('/api/health')
       .then(r => r.json())
-      .then(data) => {
+      .then((data) => {
         if (data?.env === 'preview') setIsPreview(true);
         if (data?.branch) setRef(data.branch);
       })
