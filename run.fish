@@ -1,42 +1,30 @@
-#!/usr/bin/env fish
-# Regla de oro: no sobreescribir archivos existentes del proyecto.
-# Este script SOLO crea archivos nuevos. Si ya existen, aborta.
-
-set -e
-
-# --- Ramas ---
-git checkout -b feat/preview-check
-
-# --- Rutas destino ---
-set -l ROUTE_PATH app/api/health/route.ts
-set -l PREVIEW_PAGE_PATH app/preview/page.tsx
-set -l BADGE_PATH components/PreviewBadge.tsx
-
-# --- Chequeos de no-existencia (regla de oro) ---
-for f in $ROUTE_PATH $PREVIEW_PAGE_PATH $BADGE_PATH
-    if test -e $f
-        echo "ABORTADO: '$f' ya existe. (Regla de oro: no sobreescribir)."
-        exit 1
-    end
+# === 0) Asegúrate de estar en el repo y rama correcta ===
+git rev-parse --is-inside-work-tree >/dev/null 2>&1; or begin
+  echo "❌ Esto no es un repo git"; exit 1
 end
 
-# --- Crear carpetas ---
-mkdir -p app/api/health app/preview components
+git switch feat/preview-check
 
-# --- Contenidos en base64 (evitamos heredocs de bash) ---
-set -l ROUTE_B64 "aW1wb3J0IHsgTmV4dFJlc3BvbnNlIH0gZnJvbSAnbmV4dC9zZXJ2ZXInOwoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIEdFVCgpIHsKICBjb25zdCBlbnYgPSBwcm9jZXNzLmVudi5WRVJDRUxfRU5WIHx8ICdsb2NhbCc7CiAgY29uc3QgYnJhbmNoID0gcHJvY2Vzcy5lbnYuVkVSQ0VMX0dJVF9DT01NSVRfUkVGIHx8ICdsb2NhbCc7CiAgY29uc3QgY29tbWl0ID0gcHJvY2Vzcy5lbnYuVkVSQ0VMX0dJVF9DT01NSVRfU0hBIHx8ICd1bmtub3duJzsKCiAgcmV0dXJuIE5leHRSZXNwb25zZS5qc29uKHsKICAgIG9rOiB0cnVlLAogICAgZW52LAogICAgYnJhbmNoLAogICAgY29tbWl0LAogICAgdGltZXN0YW1wOiBuZXcgRGF0ZSgpLnRvSVNPU3RyaW5nKCksCiAgfSk7Cn0K"
-set -l PREVIEW_PAGE_B64 "ZXhwb3J0IGNvbnN0IGR5bmFtaWMgPSAnZm9yY2UtZHluYW1pYyc7CgpleHBvcnQgZGVmYXVsdCBhc3luYyBmdW5jdGlvbiBQcmV2aWV3UGFnZSgpIHsKICBjb25zdCBlbnYgPSBwcm9jZXNzLmVudi5WRVJDRUxfRU5WIHx8ICdsb2NhbCc7CiAgY29uc3QgYnJhbmNoID0gcHJvY2Vzcy5lbnYuVkVSQ0VMX0dJVF9DT01NSVRfUkVGIHx8ICdsb2NhbCc7CiAgY29uc3QgY29tbWl0ID0gcHJvY2Vzcy5lbnYuVkVSQ0VMX0dJVF9DT01NSVRfU0hBIHx8ICd1bmtub3duJzsKCiAgcmV0dXJuICgKICAgIDxtYWluIGNsYXNzTmFtZT0ibWluLWhzY3JlZW4gZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcC04Ij4KICAgICAgPGRpdiBjbGFzc05hbWU9IndmdWxsIG1heC13LWxgIHJvdW5kZWQtMmxsIHNoYWRvdy1sZyBwLTYgYm9yZGVyIj4KICAgICAgICA8aDEgY2xhc3NOYW1lPSJ0ZXh0LTJ4bCBmb250LXNlbWlib2xkIG1iLTIiPk9yZVRlYyDigJMgUHJldmlldyBJbmZvPC9oMT4KICAgICAgICA8cCBjbGFzc05hbWU9Im9wYWNpdHktODAgbWItNCI+CiAgICAgICAgICBFc3RhIHBhw7FpbmEgdGUgcGVybWl0ZSB2ZXJpZmljYXIgcmlsw6FwaWRhbWVudGUgZW4gcXXDrSBlbnRvcm5vL3JhbW8gZXN0w6FzIG5hdmVnYW5kby4KICAgICAgICA8L3A+CiAgICAgICAgPHVsIGNsYXNzTmFtZT0ic3BhY2UteS0yIj4KICAgICAgICAgIDxsaT48c3Ryb25nPlZFUkNFTF9FTlY6PC9zdHJvbmc+IHtlbnZ9PC9saT4KICAgICAgICAgIDxsaT48c3Ryb25nPlJhbWE6PC9zdHJvbmc+IHticmFuY2h9PC9saT4KICAgICAgICAgIDxsaSBjbGFzc05hbWU9ImJyZWFrLWFsbCI+PHN0cm9uZz5Db21taXQ6PC9zdHJvbmc+IHtjb21taXR9PC9saT4KICAgICAgICA8L3VsPgogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJtdC02IHRleHQtc20gb3BhY2l0eS03MCI+CiAgICAgICAgICA8cD5UaXA6IGVuIHVuIGRlcGxveW1lbnQgZGUgUHJldmlldyBkZWJlcmlhcyB2ZXI8Y29kZT5WRVJDRUxfRU5WID0gcHJldmlldzwvY29kZT4geSBsYSByYW1hIGNvcnJlc3BvbmRpZW50ZS48L3A+CiAgICAgICAgICA8cD5FbmRwb2ludGUgZGUgc2FsdWQ6IDxjb2RlPi9hcGkvaGVhbHRoPC9jb2RlPjwvcD4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L21haW4+CiAgKTsKfQ=="
-set -l BADGE_B64 "J3VzZSBjbGllbnQnOwppbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnOwoKZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gUHJldmlld0JhZGdlKCkgewogIGNvbnN0IFtpc1ByZXZpZXcsIHNldElzUHJldmlld10gPSB1c2VTdGF0ZShmYWxzZSk7CiAgY29uc3QgW3JlZiwgc2V0UmVmXSA9IHVzZVN0YXRlPHN0cmluZz4oJ2xvY2FsJyk7CgogIHVzZUVmZmVjdCgoKSA9PiB7CiAgICBmZXRjaCgnL2FwaS9oZWFsdGgnKQogICAgICAudGhlbihyID0+IHIuanNvbigpKQogICAgICAudGhlbihkYXRhID0+IHsKICAgICAgICBpZiAoZGF0YT8uZW52ID09PSAncHJldmlldycpIHNldElzUHJldmlldSh0cnVlKTsKICAgICAgICBpZiAoZGF0YT8uYnJhbmNoKSBzZXRSZWYoZGF0YS5icmFuY2gpOwogICAgICB9KQogICAgICAuY2F0Y2goKCkgPT4ge30pOwogIH0sIFtdKTsKCiAgaWYgKCFpc1ByZXZpZXIpIHJldHVybiBudWxsOwoKICByZXR1cm4gKAogICAgPGRpdiBjbGFzc05hbWU9ImZpeGVkIGJvdHRvbS00IHJpZ2h0LTQgei01MCByb3VuZGVkLWZ1bGwgcHgtNCBwWS0yIHNoYWRvdy1sZyBib3JkZXIgYmctd2hpdGUvODAgYmFja2Ryb3AtYmx1ciI+CiAgICAgIDxzcGFuIGNsYXNzTmFtZT0idGV4dC1zbSBmb250LW1lZGl1bSI+UmFtYToge3JlZn08L3NwYW4+CiAgICA8L2Rpdj4KICApOwp9Cg=="
-
-# --- Escribir archivos ---
-echo -n $ROUTE_B64        | base64 --decode > $ROUTE_PATH
-echo -n $PREVIEW_PAGE_B64 | base64 --decode > $PREVIEW_PAGE_PATH
-echo -n $BADGE_B64        | base64 --decode > $BADGE_PATH
-
-# --- Git commit & push ---
+# === 1) Cambios locales: elige A (guardar) o B (descartar) ===
+# --- A) GUARDAR cambios locales (recomendado si tocaste run.fish a propósito)
 git add -A
-git commit -m "chore: add /api/health and /preview for Vercel previews (no overwrite)"
+git commit -m "chore(dev): keep local run.fish tweaks" 2>/dev/null; or echo "ℹ️ Nada que commitear (ok)"
+
+# --- B) DESCARTAR cambios en run.fish (si no quieres subirlos)
+# git checkout -- run.fish
+
+# (Si 'snapd' te aparece modificado pero no quieres subirlo, descártalo también)
+# git checkout -- snapd
+
+# === 2) Crea un archivo “ping” para forzar un diff y disparar el bot ===
+set ts (date "+%Y%m%d-%H%M%S")
+set ping ".github/ci-ping-$ts.txt"
+mkdir -p .github
+echo "ci ping $ts" > $ping
+git add $ping
+git commit -m "chore(ci): ping to trigger auto PR bot"
+
+# === 3) Push a la rama feature ===
 git push -u origin feat/preview-check
 
-echo "OK: Rama 'feat/preview-check' enviada. Vercel debería crear el Preview Deployment."
-echo "Prueba: /preview y /api/health en la URL de preview."
+echo "✅ Push hecho. Abre GitHub → Actions y Pull Requests para ver el bot en acción."
