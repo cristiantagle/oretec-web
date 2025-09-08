@@ -34,7 +34,7 @@ export default function UsersReportPanel() {
   const [rows, setRows] = useState<Row[]>([])
   const [total, setTotal] = useState(0)
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const _totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   async function fetchData(opts?: { page?: number }) {
     const p = opts?.page ?? page

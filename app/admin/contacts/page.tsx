@@ -42,7 +42,7 @@ export default function AdminContactsPage() {
   useEffect(() => { load() }, [])
 
   function setField(id: string, key: 'status'|'archived', value: any) {
-    setDraft((d) => ({ ...d, [id]: { ...(d[id]||{}), [key]: value } }))
+    setDraft((_d) => ({ ..._d, [id]: { ...(_d[id]||{}), [key]: value } }))
   }
 
   async function save(id: string) {
@@ -159,7 +159,7 @@ export default function AdminContactsPage() {
       </thead>
       <tbody className="[&>tr>*]:px-3 [&>tr>*]:py-2">
       {filtered.map(r=>{
-        const d = draft[r.id]||{}
+        const _d = draft[r.id]||{}
         return (
           <tr key={r.id} className="border-t align-top">
           <td className="whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>

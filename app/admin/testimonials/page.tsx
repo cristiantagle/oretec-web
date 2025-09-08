@@ -48,7 +48,7 @@ export default function AdminTestimonialsPage() {
   }, [])
 
   function setField(id: string, key: keyof T, value: any) {
-    setDraft((d) => ({ ...d, [id]: { ...(d[id] || {}), [key]: value } }))
+    setDraft((_d) => ({ ..._d, [id]: { ...(_d[id] || {}), [key]: value } }))
   }
 
   async function save(id: string) {
@@ -206,7 +206,7 @@ export default function AdminTestimonialsPage() {
       </thead>
       <tbody className="[&>tr>*]:px-3 [&>tr>*]:py-2">
       {rows.map((r) => {
-        const d = draft[r.id] || {}
+        const _d = draft[r.id] || {}
         return (
           <tr key={r.id} className="align-top border-t">
           <td>

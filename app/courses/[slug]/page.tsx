@@ -9,7 +9,7 @@ type APICourse = Record<string, any>
 
 export default function CourseDetailPage() {
     const params = useParams<{ slug: string }>()
-    const router = useRouter()
+    const _router = useRouter()
     const slug = (params?.slug ?? '').toString().toLowerCase()
 
     const [courses, setCourses] = useState<APICourse[]>([])

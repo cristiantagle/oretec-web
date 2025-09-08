@@ -86,7 +86,7 @@ export default function Navbar() {
     const supabase = useMemo(() => supabaseBrowser(), [])
     const [loadingUser, setLoadingUser] = useState(true)
     const [profile, setProfile] = useState<Profile | null>(null)
-    const [token, setToken] = useState<string | null>(null)
+    const [_token, setToken] = useState<string | null>(null)
     const [menuOpen, setMenuOpen] = useState(false)
 
     const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href))

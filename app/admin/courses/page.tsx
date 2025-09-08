@@ -74,8 +74,8 @@ export default function AdminCoursesPage() {
 
                 const updated = data.course as Course
                 setRows(rs => rs.map(r => (r.id === id ? updated : r)))
-                setDraft(d => {
-                    const { [id]: _, ...rest } = d
+                setDraft(_d => {
+                    const { [id]: _, ...rest } = _d
                     return rest
                 })
                 setMsg('Curso actualizado')
@@ -273,7 +273,7 @@ export default function AdminCoursesPage() {
             </thead>
             <tbody className="[&>tr>*]:px-3 [&>tr>*]:py-2">
             {rows.map((r) => {
-                const d = draft[r.id] || {}
+                const _d = draft[r.id] || {}
                 return (
                     <tr key={r.id} className="border-t align-top">
                     <td className="font-mono">{r.code}</td>
