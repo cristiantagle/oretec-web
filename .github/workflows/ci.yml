@@ -29,6 +29,7 @@ jobs:
 
       - name: Build
         env:
+          SUPABASE_SERVICE_ROLE_KEY: "dummy-service-role"
           NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
         run: npm run build
