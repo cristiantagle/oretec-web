@@ -42,6 +42,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
     }
   }
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [id]);
 
   async function save(fields: Partial<Contact>) {
