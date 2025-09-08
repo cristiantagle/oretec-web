@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-    branches: ["**"]
+    branches: [ main, feat/**, fix/**, chore/** ]
   pull_request:
-    branches: ["**"]
 
 jobs:
   ci:
@@ -16,8 +15,8 @@ jobs:
       - name: Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install deps
         run: npm ci
@@ -30,12 +29,24 @@ jobs:
 
       - name: Build
         env:
-          # 🔧 OJO: nombres correctos, sin 'SUBAPASE'
-          NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co"
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-anon"
-          SUPABASE_URL: "https://example.supabase.co"
+          # Público
+          NEXT_PUBLIC_SUPABASE_URL: "https://stknnmgjasngbnpztgrh.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0a25ubWdqYXNuZ2JucHp0Z3JoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MTc0MTYsImV4cCI6MjA3MTI5MzQxNn0.baK_7KOasYpXFADIlrsQPepb3DBItM1g2U-lDBjtSg0"
+          NEXT_PUBLIC_SITE_URL: "https://oretec-web-9jgh.vercel.app"
+
+          # Servidor (dummy en CI)
           SUPABASE_SERVICE_ROLE_KEY: "dummy-service"
-          NODE_OPTIONS: "--max_old_space_size=4096"
+
+          # Admin
+          ADMIN_TOKEN: "dummy-token"
+          ADMIN_BOOTSTRAP_EMAILS: "ci@dummy.local"
+
+          # MercadoPago (dummy en CI)
+          MP_PUBLIC_KEY: "dummy-mp-pub"
+          MP_ACCESS_TOKEN: "dummy-mp-access"
+          NEXT_PUBLIC_MP_ENV: "sandbox"
+
+          CI: "true"
         run: npm run build
 
       - name: Test /api/health handler (built)
