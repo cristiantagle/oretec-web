@@ -1,78 +1,66 @@
 #!/usr/bin/env fish
+# =========================================================
+# run.fish — CI estable + bot de PRs (compatible fish)
+# =========================================================
 
-# ===== Reglas de oro (fish-only) =====
-# - Sin heredocs (<<), usar begin...end > archivo o printf
-# - Sin backticks `...` ni ${...} en strings
-# - Salir si hay cambios locales sin commit
-
-# 1) Validaciones
-git rev-parse --is-inside-work-tree >/dev/null 2>&1; or begin
-  echo "❌ No estás dentro de un repo git"; exit 1
-end
-
-set -l dirty (git status --porcelain)
-if test -n "$dirty"
-  echo "❌ Tienes cambios locales. Haz commit o stash antes de correr este script."
+function die
+  echo -e "❌ $argv"
   exit 1
 end
 
-# 2) Variables
-set -l branch chore/fix-bot-ci
-set -l ci_file .github/workflows/ci.yml
-set -l bot_file .github/workflows/auto-pr.yml
+# 1) Verifica repo git
+git rev-parse --is-inside-work-tree >/dev/null 2>&1; or die "Ejecuta esto dentro de un repositorio git."
 
-mkdir -p .github/workflows
-
-# 3) Cambiar/crear rama
-git switch -c $branch 2>/dev/null; or git switch $branch; or begin
-  echo "❌ No pude cambiar/crear la rama $branch"; exit 1
+# 2) Verifica árbol limpio
+set changed (git status --porcelain)
+if test -n "$changed"
+  die "Tienes cambios locales. Haz commit o stash antes de correr este script."
 end
 
-# 4) Escribir ci.yml (typecheck + lint + build con envs dummy + test /api/health)
+# 3) Crea o cambia a rama
+set branch "chore/ci-stabilize"
+git rev-parse --verify $branch >/dev/null 2>&1
+if test $status -eq 0
+  git checkout $branch; or die "No pude cambiar a la rama $branch"
+else
+  git checkout -b $branch; or die "No pude crear la rama $branch"
+end
+
+# 4) CI principal
+set ci_file ".github/workflows/ci.yml"
+mkdir -p (dirname $ci_file)
+
 begin
+  echo "name: Typecheck, Lint & Build"
   echo "on:"
   echo "  push:"
-  echo "    branches: [ main, \"feat/**\", \"fix/**\", \"chore/**\", \"hotfix/**\" ]"
   echo "  pull_request:"
-  echo "    branches: [ main ]"
   echo ""
   echo "jobs:"
   echo "  ci:"
   echo "    runs-on: ubuntu-latest"
   echo "    steps:"
-  echo "      - name: Checkout"
-  echo "        uses: actions/checkout@v4"
-  echo "      - name: Use Node 20"
-  echo "        uses: actions/setup-node@v4"
+  echo "      - uses: actions/checkout@v4"
+  echo "      - uses: actions/setup-node@v4"
   echo "        with:"
   echo "          node-version: '20'"
   echo "          cache: 'npm'"
-  echo "      - name: Install deps"
-  echo "        run: npm ci"
-  echo "      - name: Typecheck"
-  echo "        run: npm run typecheck"
-  echo "      - name: Lint"
-  echo "        run: npm run lint --max-warnings=0"
-  echo "      - name: Build"
+  echo "      - run: npm ci"
+  echo "      - run: npm run typecheck"
+  echo "      - run: npm run lint --max-warnings=0"
+  echo "      - run: npm run build"
   echo "        env:"
-  echo "          NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co'"
-  echo "          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'dummy-anon-key'"
-  echo "          SUPABASE_SERVICE_ROLE_KEY: 'dummy-service-role-key'"
-  echo "        run: npm run build"
-  echo "      - name: Test /api/health (built)"
-  echo "        run: |"
-  echo "          node -e \"(async () => {"
-  echo "            const mod = require('./.next/server/app/api/health/route.js');"
-  echo "            const res = await mod.GET();"
-  echo "            const data = await res.json();"
-  echo "            if (!data || data.ok !== true) { throw new Error('Health not OK: ' + JSON.stringify(data)); }"
-  echo "            if (!Object.prototype.hasOwnProperty.call(data, 'env')) { throw new Error('Missing env in payload: ' + JSON.stringify(data)); }"
-  echo "            console.log('Health OK: ' + JSON.stringify(data));"
-  echo "          })().catch(e => { console.error(e); process.exit(1); });\""
+  echo "          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co"
+  echo "          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key"
+  echo "          SUPABASE_SERVICE_ROLE_KEY: dummy-service-role"
 end > $ci_file
 
-# 5) Escribir auto-pr.yml (crea PR desde ramas feat/*|fix/*|chore/*|hotfix/* y activa auto-merge si hay número de PR)
+# 5) Auto PR Bot
+set pr_file ".github/workflows/auto-pr.yml"
+mkdir -p (dirname $pr_file)
+
 begin
+  echo "name: Auto PR"
   echo "on:"
   echo "  push:"
   echo "    branches:"
@@ -82,43 +70,33 @@ begin
   echo "      - 'hotfix/**'"
   echo ""
   echo "jobs:"
-  echo "  auto-pr:"
+  echo "  create-pr:"
   echo "    runs-on: ubuntu-latest"
   echo "    steps:"
-  echo "      - name: Checkout"
-  echo "        uses: actions/checkout@v4"
-  echo "      - name: Create PR"
-  echo "        id: cpr"
-  echo "        uses: peter-evans/create-pull-request@v6"
+  echo "      - uses: actions/checkout@v4"
+  echo "      - uses: actions/github-script@v7"
   echo "        with:"
-  echo "          token: \${{ secrets.GITHUB_TOKEN }}"
-  echo "          commit-message: 'chore(bot): open PR from \${{ github.ref_name }}'"
-  echo "          title: 'Auto PR: \${{ github.ref_name }}'"
-  echo "          body: 'Automated PR created by workflow'"
-  echo "          branch: 'auto/pr-\${{ github.ref_name }}'"
-  echo "          base: main"
-  echo "          labels: 'automated,bot'"
-  echo "          draft: false"
-  echo "      - name: Enable auto-merge (squash)"
-  echo "        if: \${{ steps.cpr.outputs.pull-request-number != '' }}"
-  echo "        uses: peter-evans/enable-pull-request-automerge@v3"
-  echo "        with:"
-  echo "          token: \${{ secrets.GITHUB_TOKEN }}"
-  echo "          pull-request-number: \${{ steps.cpr.outputs.pull-request-number }}"
-  echo "          merge-method: squash"
-  echo "      - name: PR info"
-  echo "        if: \${{ steps.cpr.outputs.pull-request-url != '' }}"
-  echo "        run: |"
-  echo "          echo 'PR #: \${{ steps.cpr.outputs.pull-request-number }}'"
-  echo "          echo 'URL: \${{ steps.cpr.outputs.pull-request-url }}'"
-end > $bot_file
+  echo "          script: |"
+  echo "            const branch = context.ref.replace('refs/heads/','');"
+  echo "            const { owner, repo } = context.repo;"
+  echo "            const prs = await github.rest.pulls.list({ owner, repo, state: 'open', head: owner + ':' + branch });"
+  echo "            if (prs.data.length === 0) {"
+  echo "              const r = await github.rest.pulls.create({"
+  echo "                owner, repo,"
+  echo "                title: 'Auto PR: ' + branch,"
+  echo "                head: branch,"
+  echo "                base: 'main',"
+  echo "                body: 'PR creado automáticamente.'"
+  echo "              });"
+  echo "              core.info('PR creado: ' + r.data.html_url);"
+  echo "            } else {"
+  echo "              core.info('PR ya existe: ' + prs.data[0].html_url);"
+  echo "            }"
+end > $pr_file
 
-# 6) Commit & push
-git add $ci_file $bot_file
-git commit -m "chore(ci/bot): fix auto-pr conditions and add Supabase envs for build"
-git push -u origin $branch
+# 6) Commit & Push
+git add $ci_file $pr_file; or die "No pude agregar archivos."
+git commit -m "chore(actions): CI estable + auto PR bot (fish-safe)" ; or die "No pude commitear."
+git push -u origin $branch; or die "No pude hacer push."
 
-echo "✅ Listo:"
-echo "  - $ci_file actualizado con envs dummy"
-echo "  - $bot_file corregido (condiciones != '' y auto-merge)"
-echo "➡ Abre el PR de $branch. Desde ahora, push a feat/*|fix/*|chore/*|hotfix/* crea PR y activa auto-merge."
+echo "✅ Workflows listos en $branch → abre PR hacia main"

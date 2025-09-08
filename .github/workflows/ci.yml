@@ -1,9 +1,9 @@
-name: CI
-
+name: Typecheck, Lint & Build
 on:
   push:
     branches: ["**"]
   pull_request:
+    branches: ["**"]
 
 jobs:
   ci:
@@ -29,14 +29,20 @@ jobs:
 
       - name: Build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co"
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
+          # SERVER-SIDE (dummy para CI/build)
+          SUPABASE_URL: 'https://example.supabase.co'
+          SUPABASE_SERVICE_ROLE_KEY: 'dummy-service-role-key'
+          # CLIENT-SIDE (dummy para CI/build)
+          NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co'
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'dummy-anon-key'
+          # Apaga el badge en CI si molesta
+          NEXT_PUBLIC_SHOW_PREVIEW_BADGE: 'false'
         run: npm run build
 
       - name: Test /api/health handler (built)
         run: |
-          node -e " 
-            (async () => { 
+          node -e "
+            (async () => {
               const { GET } = require('./.next/server/app/api/health/route.js');
               const res = await GET();
               const data = await res.json();
@@ -44,7 +50,7 @@ jobs:
                 console.error('Health not OK:', data);
                 process.exit(1);
               }
-              if (!(''env'' in data)) {
+              if (!('env' in data)) {
                 console.error('Missing env in health payload:', data);
                 process.exit(1);
               }
