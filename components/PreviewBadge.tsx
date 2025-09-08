@@ -9,7 +9,7 @@ export default function PreviewBadge() {
     fetch('/api/health')
       .then(r => r.json())
       .then(data => {
-        if (data?.env === 'preview') setIsPrevieu(true);
+        if (data?.env === 'preview') setIsPreview(true);
         if (data?.branch) setRef(data.branch);
       })
       .catch(() => {});
