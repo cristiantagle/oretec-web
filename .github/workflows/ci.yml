@@ -2,8 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, feat/**, fix/**, chore/** ]
+    branches: ['**']
   pull_request:
+    branches: ['**']
 
 jobs:
   ci:
@@ -16,7 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: npm
 
       - name: Install deps
         run: npm ci
@@ -29,67 +30,52 @@ jobs:
 
       - name: Build
         env:
-          # Público
           NEXT_PUBLIC_SUPABASE_URL: "https://stknnmgjasngbnpztgrh.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0a25ubWdqYXNuZ2JucHp0Z3JoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MTc0MTYsImV4cCI6MjA3MTI5MzQxNn0.baK_7KOasYpXFADIlrsQPepb3DBItM1g2U-lDBjtSg0"
-          NEXT_PUBLIC_SITE_URL: "https://oretec-web-9jgh.vercel.app"
-
-          # Servidor (dummy en CI)
-          SUPABASE_SERVICE_ROLE_KEY: "dummy-service"
-
-          # Admin
-          ADMIN_TOKEN: "dummy-token"
-          ADMIN_BOOTSTRAP_EMAILS: "ci@dummy.local"
-
-          # MercadoPago (dummy en CI)
-          MP_PUBLIC_KEY: "dummy-mp-pub"
+          SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0a25ubWdqYXNuZ2JucHp0Z3JoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTcxNzQxNiwiZXhwIjoyMDcxMjkzNDE2fQ.uuqk6bhfNFVOoG-nhZOsleBzNjfYoL_x7srcSsNnuyc"
+          ADMIN_TOKEN: "cr1st1an"
+          ADMIN_BOOTSTRAP_EMAILS: "cristian.gonzalez.gt@gmail.com"
+          MP_PUBLIC_KEY: "APP_USR-506ca0c0-138f-49ef-9241-5866a125a6af"
           MP_ACCESS_TOKEN: "dummy-mp-access"
           NEXT_PUBLIC_MP_ENV: "sandbox"
-
           CI: "true"
         run: npm run build
 
-- name: Test /api/health handler (built)
+      - name: Test /api/health handler (built)
         run: |
-          node -e "
-            (async () => {
-              const mod = require('./.next/server/app/api/health/route.js');
-              const candidates = [
-                mod.GET,
-                mod.default,
-                mod.handler,
-                mod.handlers && mod.handlers.GET,
-                mod.routeModule && mod.routeModule.userland && mod.routeModule.userland.GET,
-              ].filter(Boolean);
+          node <<'JS'
+          (async () => {
+            const mod = require('./.next/server/app/api/health/route.js');
+            const candidates = [
+              mod.GET,
+              mod.default,
+              mod.handler,
+              mod.handlers && mod.handlers.GET,
+              mod.routeModule && mod.routeModule.userland && mod.routeModule.userland.GET,
+            ].filter(Boolean);
 
-              if (!candidates.length) {
-                console.error('No GET-like export found. Keys:', Object.keys(mod));
-                process.exit(1);
-              }
+            if (!candidates.length) {
+              console.error('No GET-like export found. Keys:', Object.keys(mod));
+              process.exit(1);
+            }
 
-              const fn = candidates[0];
-              if (typeof fn !== 'function') {
-                console.error('Resolved handler is not a function:', fn);
-                process.exit(1);
-              }
+            const fn = candidates[0];
+            const req = new Request('http://localhost/api/health');
+            const res = await fn(req, {});
+            if (!res || typeof res.json !== 'function') {
+              console.error('Handler did not return a Response-like object:', res);
+              process.exit(1);
+            }
 
-              // Node 20 tiene fetch/Request/Response globales.
-              const req = new Request('http://localhost/api/health');
-              const res = await fn(req, {});
-              if (!res || typeof res.json !== 'function') {
-                console.error('Handler did not return a Response-like object:', res);
-                process.exit(1);
-              }
-
-              const data = await res.json();
-              if (!data || data.ok !== true) {
-                console.error('Health not OK:', data);
-                process.exit(1);
-              }
-              if (!('env' in data)) {
-                console.error('Missing env in health payload:', data);
-                process.exit(1);
-              }
-              console.log('Health OK:', data);
-            })().catch((e) => { console.error(e); process.exit(1); });
-          "
+            const data = await res.json();
+            if (!data || data.ok !== true) {
+              console.error('Health not OK:', data);
+              process.exit(1);
+            }
+            if (!('env' in data)) {
+              console.error('Missing env in health payload:', data);
+              process.exit(1);
+            }
+            console.log('Health OK:', data);
+          })().catch((e) => { console.error(e); process.exit(1); });
+          JS
