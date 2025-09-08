@@ -22,3 +22,8 @@ dist
 *.zip
 waydroid_script
 .vercel
+
+# build info / backups
+*.tsbuildinfo
+*.bak
+
