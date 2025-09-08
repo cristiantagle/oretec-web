@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import { useEffect, useState } from 'react'
 
 type Course = { id: string; title: string; code: string }
@@ -37,7 +37,7 @@ export default function ProofPage() {
       <label className="block text-sm mb-1">Curso</label>
       <select value={courseId} onChange={e=>setCourseId(e.target.value)} className="w-full border rounded px-3 py-2 mb-3">
         <option value="">Selecciona…</option>
-        {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.title}</option>)}
+        {courses.map(c => <option key={c.id} value={c.id}>{c.code} - {c.title}</option>)}
       </select>
 
       <label className="block text-sm mb-1">Comprobante (folio o URL)</label>

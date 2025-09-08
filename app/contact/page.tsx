@@ -1,4 +1,5 @@
-'use client'
+/* eslint-disable @next/next/no-img-element */
+"use client"
 import { useState } from 'react'
 import SectionTitle from '@/components/SectionTitle'
 import Link from 'next/link'
@@ -161,7 +162,7 @@ export default function ContactPage() {
           <ul className="mt-6 grid gap-3 text-sm text-slate-700">
             <li>• Respuesta en horario hábil</li>
             <li>• Propuestas a medida para empresas</li>
-            <li>• 100% online — Certificación digital</li>
+            <li>• 100% online - Certificación digital</li>
           </ul>
         </div>
       </div>

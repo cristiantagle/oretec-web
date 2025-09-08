@@ -34,7 +34,7 @@ export default function UsersReportPanel() {
   const [rows, setRows] = useState<Row[]>([])
   const [total, setTotal] = useState(0)
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const _totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   async function fetchData(opts?: { page?: number }) {
     const p = opts?.page ?? page
@@ -120,11 +120,11 @@ export default function UsersReportPanel() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-4">
         <div className="rounded-xl border bg-white p-4 shadow-sm">
           <div className="text-xs text-slate-500">Total usuarios</div>
-          <div className="mt-1 text-2xl font-semibold text-blue-950">{kpi?.total ?? "—"}</div>
+          <div className="mt-1 text-2xl font-semibold text-blue-950">{kpi?.total ?? "-"}</div>
         </div>
         <div className="rounded-xl border bg-white p-4 shadow-sm">
           <div className="text-xs text-slate-500">Nuevos (30 días)</div>
-          <div className="mt-1 text-2xl font-semibold text-blue-950">{kpi?.nuevos_30d ?? "—"}</div>
+          <div className="mt-1 text-2xl font-semibold text-blue-950">{kpi?.nuevos_30d ?? "-"}</div>
         </div>
         <div className="rounded-xl border bg-white p-4 shadow-sm">
           <div className="text-xs text-slate-500">Por tipo (Empresa / Estudiante)</div>
@@ -203,13 +203,13 @@ export default function UsersReportPanel() {
           <tbody>
             {rows.map((u) => (
               <tr key={u.id} className="border-t">
-                <td className="px-3 py-2">{u.full_name || "—"}</td>
-                <td className="px-3 py-2">{u.rut || "—"}</td>
-                <td className="px-3 py-2">{u.email || "—"}</td>
-                <td className="px-3 py-2">{u.company_name || "—"}</td>
-                <td className="px-3 py-2">{u.account_type || "—"}</td>
-                <td className="px-3 py-2">{u.phone || "—"}</td>
-                <td className="px-3 py-2">{u.created_at ? new Date(u.created_at).toLocaleString() : "—"}</td>
+                <td className="px-3 py-2">{u.full_name || "-"}</td>
+                <td className="px-3 py-2">{u.rut || "-"}</td>
+                <td className="px-3 py-2">{u.email || "-"}</td>
+                <td className="px-3 py-2">{u.company_name || "-"}</td>
+                <td className="px-3 py-2">{u.account_type || "-"}</td>
+                <td className="px-3 py-2">{u.phone || "-"}</td>
+                <td className="px-3 py-2">{u.created_at ? new Date(u.created_at).toLocaleString() : "-"}</td>
               </tr>
             ))}
             {rows.length === 0 && !loading && (

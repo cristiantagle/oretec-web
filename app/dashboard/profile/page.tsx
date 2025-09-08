@@ -174,18 +174,18 @@ export default function ProfilePage() {
     <section className="card shadow-soft p-6 grid gap-2">
     <div>
     <span className="text-sm text-slate-500">Nombre</span>
-    <div className="text-slate-900 font-medium">{profile.full_name || '—'}</div>
+    <div className="text-slate-900 font-medium">{profile.full_name || '-'}</div>
     </div>
 
     <div>
     <span className="text-sm text-slate-500">Tipo de cuenta</span>
-    <div className="text-slate-900 font-medium">{profile.account_type || '—'}</div>
+    <div className="text-slate-900 font-medium">{profile.account_type || '-'}</div>
     </div>
 
     {profile.account_type === 'company' && (
       <div>
       <span className="text-sm text-slate-500">Empresa</span>
-      <div className="text-slate-900 font-medium">{profile.company_name || '—'}</div>
+      <div className="text-slate-900 font-medium">{profile.company_name || '-'}</div>
       </div>
     )}
     </section>

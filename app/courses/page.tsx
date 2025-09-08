@@ -1,4 +1,6 @@
-'use client'
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client"
 
 import { useEffect, useState } from 'react'
 import CourseCard from '@/components/CourseCard'
@@ -32,6 +34,7 @@ export default function CoursesPage() {
     }
   }
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [nonce])
 
   // helpers
@@ -94,7 +97,7 @@ export default function CoursesPage() {
     <main className="mx-auto max-w-6xl px-4 py-10">
     {/* Título unificado */}
     <FadeIn>
-    <SectionTitle subtitle="Formación e-learning en prevención y seguridad laboral — Chile.">
+    <SectionTitle subtitle="Formación e-learning en prevención y seguridad laboral - Chile.">
     Catálogo de cursos
     </SectionTitle>
     </FadeIn>

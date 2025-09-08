@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 // components/Testimonials.tsx
 'use client'
 
@@ -117,7 +118,7 @@ export default function Testimonials() {
                 <Stars />
                 <QuoteMark />
                 </div>
-                <p className="mt-3 text-slate-700">“{t.quote}”</p>
+                <p className="mt-3 text-slate-700">"{t.quote}"</p>
                 <div className="mt-5 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white text-sm font-semibold">
                 {t.initials || (t.name?.slice(0, 2).toUpperCase() ?? 'UX')}

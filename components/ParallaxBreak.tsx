@@ -13,7 +13,7 @@ export default function ParallaxBreak({
     image = '/images/hero-elearning.png',
     height = 240,
     strength = 0.2,
-    caption = 'Aprende a tu ritmo — 100% online',
+    caption = 'Aprende a tu ritmo - 100% online',
 }: Props) {
     const ref = useRef<HTMLDivElement | null>(null)
 

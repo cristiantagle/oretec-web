@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import Image from 'next/image'
 import Link from 'next/link'
 import FadeIn from '@/components/FadeIn'
@@ -109,7 +109,7 @@ export default function HeroElearn() {
         <FadeIn delay={0.28}>
         <div className="card absolute left-3 top-3 z-10 px-3 py-2 text-xs sm:left-4 sm:top-4 sm:px-4 sm:py-3 sm:text-sm">
         <div className="font-medium text-slate-800">Cursos activos</div>
-        <div className="text-slate-600">Catálogo actualizado — CLP</div>
+        <div className="text-slate-600">Catálogo actualizado - CLP</div>
         </div>
         </FadeIn>
 

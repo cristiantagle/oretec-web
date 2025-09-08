@@ -67,7 +67,7 @@ export default function ReportsPage() {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10">
       <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-      {error ? `Error: ${error}` : '403 – Acceso restringido: solo administradores.'}
+      {error ? `Error: ${error}` : '403 - Acceso restringido: solo administradores.'}
       </div>
       <div className="flex gap-2">
       <Link href="/dashboard" className="btn-secondary">← Volver</Link>

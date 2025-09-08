@@ -223,10 +223,10 @@ export default function AdminUsersPage() {
       const value = (pendingRole[u.id] ?? u.account_type ?? 'student') as AccountType
       return (
         <tr key={u.id} className="border-t">
-        <td className="px-3 py-2">{u.full_name || '—'}</td>
-        <td className="px-3 py-2">{u.rut || '—'}</td>
-        <td className="px-3 py-2">{u.email || '—'}</td>
-        <td className="px-3 py-2">{u.company_name || '—'}</td>
+        <td className="px-3 py-2">{u.full_name || '-'}</td>
+        <td className="px-3 py-2">{u.rut || '-'}</td>
+        <td className="px-3 py-2">{u.email || '-'}</td>
+        <td className="px-3 py-2">{u.company_name || '-'}</td>
         <td className="px-3 py-2">
         <div className="flex items-center gap-2">
         <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-900 ring-1 ring-blue-200">
@@ -245,8 +245,8 @@ export default function AdminUsersPage() {
         </select>
         </div>
         </td>
-        <td className="px-3 py-2">{u.phone || '—'}</td>
-        <td className="px-3 py-2">{u.updated_at ? new Date(u.updated_at).toLocaleString() : '—'}</td>
+        <td className="px-3 py-2">{u.phone || '-'}</td>
+        <td className="px-3 py-2">{u.updated_at ? new Date(u.updated_at).toLocaleString() : '-'}</td>
         <td className="px-3 py-2">
         <div className="flex items-center gap-2">
         <button

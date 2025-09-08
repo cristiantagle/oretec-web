@@ -24,7 +24,7 @@ import GlowBreak from '@/components/GlowBreak'
 import SectionTitle from '@/components/SectionTitle'
 
 export const metadata = {
-  title: 'OreTec — Formación e-learning en Prevención y Seguridad Laboral',
+  title: 'OreTec - Formación e-learning en Prevención y Seguridad Laboral',
   description: 'Cursos online en prevención y seguridad laboral, certificados y 100% e-learning.',
 }
 

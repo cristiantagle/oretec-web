@@ -1,12 +1,13 @@
-'use client'
+"use client"
 import Link from 'next/link'
+import BuyNowMP from '@/components/BuyNowMP'
 
 type Props = {
     title: string
     code?: string | null
     hours?: number | null
     priceCLP?: number | null
-    href?: string | null | undefined   // puede venir vacío o undefined
+    href?: string | null
     description?: string | null
 }
 
@@ -18,7 +19,6 @@ export default function CourseCard({
     href = null,
     description = null,
 }: Props) {
-    // Normaliza CLP
     const clp = (n: number) =>
     (n || 0).toLocaleString('es-CL', {
         style: 'currency',
@@ -26,9 +26,8 @@ export default function CourseCard({
         maximumFractionDigits: 0,
     })
 
-    // 👇 Normaliza href: si viene '', '  ', undefined ⇒ null
-    const safeHref: string | null =
-    typeof href === 'string' && href.trim().length > 0 ? href : null
+    const hasPrice = typeof priceCLP === 'number' && priceCLP > 0
+    const hasLink = typeof href === 'string' && href.length > 0
 
     return (
         <article className="group card card-hover p-5">
@@ -50,21 +49,27 @@ export default function CourseCard({
         {typeof hours === 'number' && hours > 0 && (
             <span className="chip">⏱ {hours} h</span>
         )}
-        {typeof priceCLP === 'number' && priceCLP > 0 && (
-            <span className="chip">💵 {clp(priceCLP)}</span>
-        )}
+        {hasPrice && <span className="chip">💵 {clp(priceCLP!)}</span>}
         </div>
 
         <div className="mt-auto pt-5">
-        {safeHref ? (
+        {hasLink ? (
             <Link
-            href={safeHref}
+            href={href!}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary w-full"
             >
             Comprar ahora
             </Link>
+        ) : hasPrice ? (
+            <BuyNowMP
+            title={title}
+            unitPriceCLP={priceCLP!}
+            courseCode={code ?? undefined}
+            label="Comprar ahora"
+            className="btn-primary w-full"
+            />
         ) : (
             <span className="btn-secondary w-full cursor-not-allowed opacity-60">
             Próximamente
