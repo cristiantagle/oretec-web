@@ -27,3 +27,4 @@ waydroid_script
 *.tsbuildinfo
 *.bak
 
+\nsnapd/
