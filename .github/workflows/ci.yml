@@ -1,34 +1,42 @@
-name: Typecheck, Lint & Build
+name: CI
 
 on:
-  push: [ push, pull_request ]
+  push:
+    branches: ["**"]
+  pull_request:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@2
+        uses: actions/checkout@v4
+
       - name: Node 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+
       - name: Install deps
         run: npm ci
+
       - name: Typecheck
         run: npm run typecheck
+
       - name: Lint
         run: npm run lint --max-warnings=0
+
       - name: Build
         env:
-          NEXT_PUBLIC_SUBAPASE_URL: "https://example.supabase.co"
-          NEXT_PUBLIC_SUBAPASE_ANON_KEY: "dummy-key"
+          NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
         run: npm run build
+
       - name: Test /api/health handler (built)
         run: |
-          node -e "
-            (async () => {
+          node -e " 
+            (async () => { 
               const { GET } = require('./.next/server/app/api/health/route.js');
               const res = await GET();
               const data = await res.json();
@@ -36,7 +44,7 @@ jobs:
                 console.error('Health not OK:', data);
                 process.exit(1);
               }
-              if (!('env' in data)) {
+              if (!(''env'' in data)) {
                 console.error('Missing env in health payload:', data);
                 process.exit(1);
               }
