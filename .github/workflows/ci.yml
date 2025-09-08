@@ -25,3 +25,21 @@ jobs:
           NEXT_PUBLIC_SUBAPASE_URL: "https://example.supabase.co"
           NEXT_PUBLIC_SUBAPASE_ANON_KEY: "dummy-key"
         run: npm run build
+      - name: Test /api/health handler (built)
+        run: |
+          node -e "
+            (async () => {
+              const { GET } = require('./.next/server/app/api/health/route.js');
+              const res = await GET();
+              const data = await res.json();
+              if (!data || data.ok !== true) {
+                console.error('Health not OK:', data);
+                process.exit(1);
+              }
+              if (!('env' in data)) {
+                console.error('Missing env in health payload:', data);
+                process.exit(1);
+              }
+              console.log('Health OK:', data);
+            })().catch((e) => { console.error(e); process.exit(1); });
+          "
