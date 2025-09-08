@@ -1,6 +1,5 @@
-import { Pool } from 'pg';
+import { Pool, Client } from 'pg';
 import "./env";
-import { Client } from "pg";
 
 function connString() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -37,7 +36,6 @@ main().catch((e) => {
 
 /** Forzar IPv4 en cliente pg para evitar ENETUNREACH (IPv6) */
 import dns from "node:dns";
-import { Pool } from "pg";
 
 function createIPv4Pool(connStr: string) {
   return new Pool({
