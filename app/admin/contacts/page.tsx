@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -84,7 +84,7 @@ export default function AdminContactsPage() {
   return (
     <main className="max-w-6xl mx-auto px-4 py-10">
     <div className="mb-6 flex items-center justify-between gap-3">
-    <h1 className="text-2xl font-bold" style={{color:'#1E3A8A'}}>Admin — Contactos</h1>
+    <h1 className="text-2xl font-bold" style={{color:'#1E3A8A'}}>Admin - Contactos</h1>
     <div className="flex gap-2">
     <Link href="/admin" className="btn-secondary">← Volver</Link>
     <button onClick={load} className="btn-secondary">↻ Recargar</button>
@@ -124,7 +124,7 @@ export default function AdminContactsPage() {
         {new Date(r.created_at).toLocaleString()}
         </div>
         <div className="mt-0.5 font-medium text-slate-900 truncate">
-        {r.name}{r.company ? ` — ${r.company}` : ''}
+        {r.name}{r.company ? ` - ${r.company}` : ''}
         </div>
         <div className="mt-1 text-xs text-slate-600">
         {r.email}{r.phone ? ` · ${r.phone}` : ''}
@@ -165,11 +165,11 @@ export default function AdminContactsPage() {
           <td className="whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
           <td className="whitespace-nowrap">
           <div className="font-medium text-slate-900">{r.name}</div>
-          <div className="text-xs text-slate-500">{r.company || '—'}</div>
+          <div className="text-xs text-slate-500">{r.company || '-'}</div>
           </td>
           <td className="whitespace-nowrap">
           <div>{r.email}</div>
-          <div className="text-xs text-slate-500">{r.phone || '—'}</div>
+          <div className="text-xs text-slate-500">{r.phone || '-'}</div>
           </td>
           {/* Columna Ver adelantada para evitar scroll largo */}
           <td className="whitespace-nowrap">

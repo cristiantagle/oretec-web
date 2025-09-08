@@ -21,7 +21,7 @@ async function trySelect(cols: string[]) {
 
 export async function GET() {
   try {
-    // Conjuntos de columnas a probar en orden (desde las más “ricas” a las más mínimas)
+    // Conjuntos de columnas a probar en orden (desde las más "ricas" a las más mínimas)
     const candidates: string[][] = [
       ["id","user_id","course_code","status","created_at"],
       ["id","user_id","course_id","status","created_at"],

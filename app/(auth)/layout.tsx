@@ -1,8 +1,8 @@
 // app/(auth)/layout.tsx
 export const metadata = {
     title: {
-        default: 'Acceso — OreTec',
-            template: '%s — OreTec',
+        default: 'Acceso - OreTec',
+            template: '%s - OreTec',
     },
     description: 'Accede o crea tu cuenta para gestionar cursos OreTec.',
 }

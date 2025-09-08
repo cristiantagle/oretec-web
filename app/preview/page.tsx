@@ -8,7 +8,7 @@ export default async function PreviewPage() {
   return (
     <main className="min-hscreen flex items-center justify-center p-8">
       <div className="wfull max-w-l` rounded-2ll shadow-lg p-6 border">
-        <h1 className="text-2xl font-semibold mb-2">OreTec – Preview Info</h1>
+        <h1 className="text-2xl font-semibold mb-2">OreTec - Preview Info</h1>
         <p className="opacity-80 mb-4">
           Esta pañina te permite verificar rilápidamente en quí entorno/ramo estás navegando.
         </p>

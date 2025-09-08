@@ -1,4 +1,4 @@
-'use client';
+"use client"
 import { useEffect, useState } from 'react';
 
 type SearchParams = Record<string, string | string[] | undefined>;

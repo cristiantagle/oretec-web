@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
@@ -66,7 +66,7 @@ export default function AdminPage() {
     <main className="max-w-6xl mx-auto px-4 py-10">
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
     <h1 className="text-2xl font-bold" style={{ color: '#1E3A8A' }}>
-    Panel Admin — Órdenes
+    Panel Admin - Órdenes
     </h1>
 
     <div className="flex flex-wrap items-center gap-3">
@@ -113,8 +113,8 @@ export default function AdminPage() {
       {rows.map((r) => (
         <tr key={r.order_id} className="border-t">
         <td>{new Date(r.created_at).toLocaleString()}</td>
-        <td>{r.user_name || r.user_email || '—'}</td>
-        <td>{r.course_title ? `${r.course_title} (${r.course_code})` : '—'}</td>
+        <td>{r.user_name || r.user_email || '-'}</td>
+        <td>{r.course_title ? `${r.course_title} (${r.course_code})` : '-'}</td>
         <td>{clp(r.price_cents ?? 0)}</td>
         <td>
         <span
@@ -140,7 +140,7 @@ export default function AdminPage() {
           Ver
           </a>
         ) : (
-          '—'
+          '-'
         )}
         </td>
         <td className="space-x-2">

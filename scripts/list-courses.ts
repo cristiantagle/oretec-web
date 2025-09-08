@@ -47,7 +47,7 @@ async function main() {
   console.log("Total cursos:", rows.length);
   for (const r of rows) {
     console.log(
-      `- ${r.id} | ${r.code ?? "—"} | ${r.title ?? r.name ?? "Curso"} | pub:${r.published ?? "?"} act:${r.is_active ?? "?"} vis:${r.visible ?? "?"}`
+      `- ${r.id} | ${r.code ?? "-"} | ${r.title ?? r.name ?? "Curso"} | pub:${r.published ?? "?"} act:${r.is_active ?? "?"} vis:${r.visible ?? "?"}`
     );
   }
 }

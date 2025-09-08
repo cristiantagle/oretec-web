@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/browser'
@@ -261,7 +261,7 @@ export default function ProfileForm() {
         />
         </div>
 
-        {/* Tipo de cuenta: visible para todos; “Administrador” deshabilitado si no eres admin */}
+        {/* Tipo de cuenta: visible para todos; "Administrador" deshabilitado si no eres admin */}
         <div>
         <label className="block text-sm font-medium">Tipo de cuenta</label>
         <select
@@ -281,7 +281,7 @@ export default function ProfileForm() {
         </select>
         {!isAdmin && (
           <p className="mt-1 text-xs text-slate-500">
-          Solo un administrador puede asignar el rol “Administrador”.
+          Solo un administrador puede asignar el rol "Administrador".
           </p>
         )}
         </div>

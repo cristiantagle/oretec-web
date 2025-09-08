@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import Image from 'next/image'
 import Link from 'next/link'
 import FadeIn from '@/components/FadeIn'
@@ -22,7 +22,7 @@ export default function Footer() {
         <span className="font-semibold text-white">ORETEC</span>
         </div>
         <p className="mt-3 text-sm text-slate-400 leading-relaxed">
-        Formación e-learning en prevención y seguridad laboral — Chile.
+        Formación e-learning en prevención y seguridad laboral - Chile.
         </p>
         </div>
         </FadeIn>

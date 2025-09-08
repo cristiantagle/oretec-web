@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -72,7 +72,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
   }
 
   const mailto = row?.email
-  ? `mailto:${row.email}?subject=${encodeURIComponent(row?.subject || "Consulta")}&body=${encodeURIComponent((row?.message || "") + "\n\n— Enviado desde OreTec")}`
+  ? `mailto:${row.email}?subject=${encodeURIComponent(row?.subject || "Consulta")}&body=${encodeURIComponent((row?.message || "") + "\n\n- Enviado desde OreTec")}`
   : null;
 
   const tel = row?.phone ? `tel:${row.phone}` : null;
@@ -80,7 +80,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
     <div className="mb-6 flex items-center justify-between">
-    <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>Admin — Contacto</h1>
+    <h1 className="text-2xl font-bold" style={{ color: "#1E3A8A" }}>Admin - Contacto</h1>
     <div className="flex gap-2">
     <Link href="/admin/contacts" className="btn-secondary">← Volver</Link>
     <button onClick={load} className="btn-secondary">Recargar</button>
@@ -120,7 +120,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
       {/* Mensaje completo */}
       <section className="card shadow-soft p-5">
       <div className="mb-2 text-sm font-medium text-slate-900">Mensaje</div>
-      <p className="whitespace-pre-wrap text-slate-700">{row.message || "—"}</p>
+      <p className="whitespace-pre-wrap text-slate-700">{row.message || "-"}</p>
       </section>
 
       {/* Acciones / estado */}

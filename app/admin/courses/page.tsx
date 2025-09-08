@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useEffect, useMemo, useState } from 'react'
 
@@ -177,7 +177,7 @@ export default function AdminCoursesPage() {
     return (
         <main className="max-w-6xl mx-auto px-4 py-10">
         <h1 className="mb-2 text-2xl font-bold" style={{ color: '#1E3A8A' }}>
-        Admin — Cursos
+        Admin - Cursos
         </h1>
 
         {msg && <div className="mb-4 rounded-xl border p-3 text-sm bg-blue-50 text-blue-700">{msg}</div>}

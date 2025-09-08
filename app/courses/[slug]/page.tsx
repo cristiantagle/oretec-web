@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -142,7 +142,7 @@ export default function CourseDetailPage() {
                 {desc && <p className="mt-2 text-slate-600">{desc}</p>}
 
                 <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-700">
-                <div>⏱ Horas: {typeof hrs === 'number' ? hrs : '—'}</div>
+                <div>⏱ Horas: {typeof hrs === 'number' ? hrs : '-'}</div>
                 <div>💳 Precio: {typeof price === 'number' ? clp(price) : 'Consultar'}</div>
                 </div>
 

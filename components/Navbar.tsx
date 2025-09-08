@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -204,7 +204,7 @@ export default function Navbar() {
         {/* Divider sutil */}
         <span className="mx-2 h-5 w-px bg-slate-200" aria-hidden />
 
-        {/* Si NO hay sesión: botones clásicos (sin “Admin” público para evitar confusión) */}
+        {/* Si NO hay sesión: botones clásicos (sin "Admin" público para evitar confusión) */}
         {!profile && !loadingUser && (
             <>
             <Link href="/login" prefetch={false} className="btn-secondary">
@@ -247,7 +247,7 @@ export default function Navbar() {
                 >
                 <div className="px-3 py-2 text-xs text-slate-500">
                 Conectado como<br/>
-                <span className="font-medium text-slate-900">{profile.email || '—'}</span>
+                <span className="font-medium text-slate-900">{profile.email || '-'}</span>
                 </div>
                 <div className="h-px bg-slate-200" />
                 <Link
@@ -365,7 +365,7 @@ export default function Navbar() {
                 <div className="font-medium text-blue-950">
                 {firstNameFrom(profile.full_name, profile.email)}
                 </div>
-                <div className="text-xs text-slate-600">{profile.email || '—'}</div>
+                <div className="text-xs text-slate-600">{profile.email || '-'}</div>
                 </div>
                 </div>
                 <div className="mt-2 grid gap-1">

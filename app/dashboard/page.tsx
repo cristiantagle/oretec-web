@@ -162,7 +162,7 @@ export default function DashboardPage() {
         </button>
         </header>
 
-        {/* Tarjeta tipo “carnet” */}
+        {/* Tarjeta tipo "carnet" */}
         <section className="relative mx-auto w-full max-w-2xl rounded-2xl border bg-gradient-to-br from-blue-50 to-white p-6 shadow-md ring-1 ring-blue-100">
         {/* Encabezado con avatar, nombre y tipo */}
         <div className="flex items-center gap-5">
@@ -180,7 +180,7 @@ export default function DashboardPage() {
         <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
         <h2 className="truncate text-2xl font-semibold text-blue-950">
-        {profile?.full_name || '—'}
+        {profile?.full_name || '-'}
         </h2>
         <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-900 ring-1 ring-blue-200">
         {accountTypeToEs(profile?.account_type)}
@@ -195,15 +195,15 @@ export default function DashboardPage() {
         <div className="grid gap-1 text-sm text-slate-700">
         <div className="truncate">
         <span className="text-slate-500">Correo: </span>
-        <span className="font-medium">{profile?.email || '—'}</span>
+        <span className="font-medium">{profile?.email || '-'}</span>
         </div>
         <div className="truncate">
         <span className="text-slate-500">Empresa: </span>
-        <span className="font-medium">{profile?.company_name || (isCompany ? '—' : '—')}</span>
+        <span className="font-medium">{profile?.company_name || (isCompany ? '-' : '-')}</span>
         </div>
         <div className="truncate">
         <span className="text-slate-500">Teléfono: </span>
-        <span className="font-medium">{profile?.phone || '—'}</span>
+        <span className="font-medium">{profile?.phone || '-'}</span>
         </div>
         </div>
 
@@ -211,15 +211,15 @@ export default function DashboardPage() {
         <div className="grid gap-1 text-sm text-slate-700">
         <div className="truncate">
         <span className="text-slate-500">{isCompany ? 'RUT empresa: ' : 'RUT: '}</span>
-        <span className="font-medium">{profile?.rut || '—'}</span>
+        <span className="font-medium">{profile?.rut || '-'}</span>
         </div>
         <div className="truncate">
         <span className="text-slate-500">Nacionalidad: </span>
-        <span className="font-medium">{profile?.nationality || '—'}</span>
+        <span className="font-medium">{profile?.nationality || '-'}</span>
         </div>
         <div className="truncate">
         <span className="text-slate-500">Profesión / oficio: </span>
-        <span className="font-medium">{profile?.profession || '—'}</span>
+        <span className="font-medium">{profile?.profession || '-'}</span>
         </div>
         </div>
         </div>
@@ -231,7 +231,7 @@ export default function DashboardPage() {
         <div className="mt-3 text-sm text-slate-700">
         <span className="text-slate-500">Dirección: </span>
         <span className="font-medium break-words">
-        {profile?.address || '—'}
+        {profile?.address || '-'}
         </span>
         </div>
 
