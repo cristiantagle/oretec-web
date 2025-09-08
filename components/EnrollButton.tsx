@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useState } from "react";
 
@@ -34,7 +34,7 @@ export default function EnrollButton( {
       onClick={handleClick}
       disabled={loading}
     >
-      {loading ? "Procesando..." : children]
+      {loading ? "Procesando..." : children}
     </button>
   );
 }
