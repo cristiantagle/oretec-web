@@ -1,4 +1,4 @@
-name: CI
+name: Typecheck, Lint & Build
 
 on:
   push:
@@ -29,25 +29,30 @@ jobs:
 
       - name: Build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co"
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          ADMIN_BOOTSTRAP_EMAILS: ${{ secrets.ADMIN_BOOTSTRAP_EMAILS }}
+          MP_PUBLIC_KEY: ${{ secrets.MP_PUBLIC_KEY }}
+          MP_ACCESS_TOKEN: ${{ secrets.MP_ACCESS_TOKEN }}
+          NEXT_PUBLIC_MP_ENV: ${{ secrets.NEXT_PUBLIC_MP_ENV }}
+          CI: 'true'
         run: npm run build
 
       - name: Test /api/health handler (built)
         run: |
-          node -e " 
-            (async () => { 
-              const { GET } = require('./.next/server/app/api/health/route.js');
+          node -e "
+            (async () => {
+              const mod = require('./.next/server/app/api/health/route.js');
+              const GET = mod?.GET || mod?.default || mod?.handler || (mod?.handlers && mod.handlers.GET);
+              if (typeof GET !== 'function') { throw new TypeError('GET is not a function'); }
               const res = await GET();
               const data = await res.json();
-              if (!data || data.ok !== true) {
-                console.error('Health not OK:', data);
-                process.exit(1);
-              }
-              if (!(''env'' in data)) {
-                console.error('Missing env in health payload:', data);
-                process.exit(1);
-              }
+              if (!data || data.ok !== true) { console.error('Health not OK:', data); process.exit(1); }
+              if (!('env' in data)) { console.error('Missing env in health payload:', data); process.exit(1); }
               console.log('Health OK:', data);
             })().catch((e) => { console.error(e); process.exit(1); });
           "
