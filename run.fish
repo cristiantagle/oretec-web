@@ -1,102 +1,91 @@
 #!/usr/bin/env fish
-# =========================================================
-# run.fish — CI estable + bot de PRs (compatible fish)
-# =========================================================
 
 function die
-  echo -e "❌ $argv"
+  echo "❌ $argv" >&2
   exit 1
 end
 
-# 1) Verifica repo git
-git rev-parse --is-inside-work-tree >/dev/null 2>&1; or die "Ejecuta esto dentro de un repositorio git."
+# 0) Verificaciones básicas
+test -d .git; or die "Ejecuta este script en la raíz del repositorio (donde está la carpeta .git)."
 
-# 2) Verifica árbol limpio
-set changed (git status --porcelain)
-if test -n "$changed"
-  die "Tienes cambios locales. Haz commit o stash antes de correr este script."
-end
+set CI_FILE .github/workflows/ci.yml
+mkdir -p (dirname $CI_FILE)
 
-# 3) Crea o cambia a rama
-set branch "chore/ci-stabilize"
-git rev-parse --verify $branch >/dev/null 2>&1
-if test $status -eq 0
-  git checkout $branch; or die "No pude cambiar a la rama $branch"
-else
-  git checkout -b $branch; or die "No pude crear la rama $branch"
-end
-
-# 4) CI principal
-set ci_file ".github/workflows/ci.yml"
-mkdir -p (dirname $ci_file)
-
+# 1) Escribe el workflow CI usando 'begin … end > archivo' (fish-friendly)
 begin
   echo "name: Typecheck, Lint & Build"
   echo "on:"
   echo "  push:"
+  echo "    branches: [\"**\"]"
   echo "  pull_request:"
+  echo "    branches: [\"**\"]"
   echo ""
   echo "jobs:"
   echo "  ci:"
   echo "    runs-on: ubuntu-latest"
   echo "    steps:"
-  echo "      - uses: actions/checkout@v4"
-  echo "      - uses: actions/setup-node@v4"
+  echo "      - name: Checkout"
+  echo "        uses: actions/checkout@v4"
+  echo ""
+  echo "      - name: Node 20"
+  echo "        uses: actions/setup-node@v4"
   echo "        with:"
   echo "          node-version: '20'"
   echo "          cache: 'npm'"
-  echo "      - run: npm ci"
-  echo "      - run: npm run typecheck"
-  echo "      - run: npm run lint --max-warnings=0"
-  echo "      - run: npm run build"
-  echo "        env:"
-  echo "          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co"
-  echo "          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key"
-  echo "          SUPABASE_SERVICE_ROLE_KEY: dummy-service-role"
-end > $ci_file
-
-# 5) Auto PR Bot
-set pr_file ".github/workflows/auto-pr.yml"
-mkdir -p (dirname $pr_file)
-
-begin
-  echo "name: Auto PR"
-  echo "on:"
-  echo "  push:"
-  echo "    branches:"
-  echo "      - 'feat/**'"
-  echo "      - 'fix/**'"
-  echo "      - 'chore/**'"
-  echo "      - 'hotfix/**'"
   echo ""
-  echo "jobs:"
-  echo "  create-pr:"
-  echo "    runs-on: ubuntu-latest"
-  echo "    steps:"
-  echo "      - uses: actions/checkout@v4"
-  echo "      - uses: actions/github-script@v7"
-  echo "        with:"
-  echo "          script: |"
-  echo "            const branch = context.ref.replace('refs/heads/','');"
-  echo "            const { owner, repo } = context.repo;"
-  echo "            const prs = await github.rest.pulls.list({ owner, repo, state: 'open', head: owner + ':' + branch });"
-  echo "            if (prs.data.length === 0) {"
-  echo "              const r = await github.rest.pulls.create({"
-  echo "                owner, repo,"
-  echo "                title: 'Auto PR: ' + branch,"
-  echo "                head: branch,"
-  echo "                base: 'main',"
-  echo "                body: 'PR creado automáticamente.'"
-  echo "              });"
-  echo "              core.info('PR creado: ' + r.data.html_url);"
-  echo "            } else {"
-  echo "              core.info('PR ya existe: ' + prs.data[0].html_url);"
-  echo "            }"
-end > $pr_file
+  echo "      - name: Install deps"
+  echo "        run: npm ci"
+  echo ""
+  echo "      - name: Typecheck"
+  echo "        run: npm run typecheck"
+  echo ""
+  echo "      - name: Lint"
+  echo "        run: npm run lint --max-warnings=0"
+  echo ""
+  echo "      - name: Build"
+  echo "        env:"
+  echo "          # SERVER-SIDE (dummy para CI/build)"
+  echo "          SUPABASE_URL: 'https://example.supabase.co'"
+  echo "          SUPABASE_SERVICE_ROLE_KEY: 'dummy-service-role-key'"
+  echo "          # CLIENT-SIDE (dummy para CI/build)"
+  echo "          NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co'"
+  echo "          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'dummy-anon-key'"
+  echo "          # Apaga el badge en CI si molesta"
+  echo "          NEXT_PUBLIC_SHOW_PREVIEW_BADGE: 'false'"
+  echo "        run: npm run build"
+  echo ""
+  echo "      - name: Test /api/health handler (built)"
+  echo "        run: |"
+  echo "          node -e \""
+  echo "            (async () => {"
+  echo "              const { GET } = require('./.next/server/app/api/health/route.js');"
+  echo "              const res = await GET();"
+  echo "              const data = await res.json();"
+  echo "              if (!data || data.ok !== true) {"
+  echo "                console.error('Health not OK:', data);"
+  echo "                process.exit(1);"
+  echo "              }"
+  echo "              if (!('env' in data)) {"
+  echo "                console.error('Missing env in health payload:', data);"
+  echo "                process.exit(1);"
+  echo "              }"
+  echo "              console.log('Health OK:', data);"
+  echo "            })().catch((e) => { console.error(e); process.exit(1); });"
+  echo "          \""
+end > $CI_FILE
 
-# 6) Commit & Push
-git add $ci_file $pr_file; or die "No pude agregar archivos."
-git commit -m "chore(actions): CI estable + auto PR bot (fish-safe)" ; or die "No pude commitear."
-git push -u origin $branch; or die "No pude hacer push."
+# 2) Rama y commit
+set BRANCH chore/ci-envs-dummy
 
-echo "✅ Workflows listos en $branch → abre PR hacia main"
+# Crea rama nueva desde main (sin pisar cambios locales)
+git rev-parse --verify main >/dev/null 2>&1; or die "No encuentro la rama 'main'."
+git status --porcelain | grep -q '^[ MADRCU]'; and die "Tienes cambios locales. Haz commit/stash antes de correr este script."
+
+git checkout -b $BRANCH main; or die "No pude crear/cambiar a la rama $BRANCH."
+
+git add $CI_FILE
+git commit -m "ci: add dummy Supabase envs; build + health check on Node 20"
+git push -u origin $BRANCH; or die "No pude pushear la rama $BRANCH."
+
+echo "✅ Workflow escrito en $CI_FILE y enviado en la rama '$BRANCH'."
+echo "   Abre el PR hacia main; el build ya no pedirá SUPABASE_* reales en CI."
