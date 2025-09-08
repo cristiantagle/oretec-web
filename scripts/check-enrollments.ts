@@ -42,7 +42,7 @@ function createIPv4Pool(connStr: string) {
     connectionString: connStr,
     ssl: { rejectUnauthorized: false },
     // Fuerza A-record (IPv4) en la resolución DNS
-    lookup: (hostname, _opts, cb) => dns.lookup(hostname, { family: 4 }, cb as any),
+
     keepAlive: true,
     statement_timeout: 30_000,
     idleTimeoutMillis: 30_000,
