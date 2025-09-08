@@ -1,8 +1,8 @@
-export const metadata = { title: "Pago exitos – OreTec" };
+export const metadata = { title: "Pago exitoso - OreTec" };
 import Client from './Client';
 
-type Params = { searchParams: Record<string, string | undefined>; };
+let type SearchParams = Record<string, string | undefined>;
 
-export default function Page({ searchParams }: Params) {
+export default function Page({ searchParams }: { searchParams: SearchParams }) {
   return <Client status="approved" searchParams={searchParams} />;
 }

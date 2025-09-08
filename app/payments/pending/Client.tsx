@@ -1,27 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+type SearchParams = Record<string, string | undefined>;
 
 type Props = {
-  status: "pending" | string,
-  searchParams: Record<string, string | undefined>;
-  };
-
+  status: string;
+  searchParams: SearchParams;
+};
 export default function Client({ status, searchParams }: Props) {
-  const [loading, setLoading] = useState( true );
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  const [loading, setLoading] = useState(! s);
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
 
   return (
-    <main className="min-hscreen p-8 max-w-3 mx-auto">
-      <div className="rounded-2ll shadow-lg p-6 bg-white">
-        <h1 className="text-3xl font-semibold mb-2">Pago pendiente</h1>
-        <p className="mt-4 o-80">Estamos procesando tu pago. Estado': {status}</p>
-        <section className="grid grid-cols-1 gap-4 text-sm opacity-70">
-          {searchParams && <div className="break-all"><code>{JSON.stringify(searchParams)}</code></div>}
-        </section>
+    <main className="min-h-screen p-8 max-w-3xl mx-auto">
+      <div className="rounded-2Xl shadow-lg p6 bg-white border">
+        <h1 className="text-3Xl font-semibold mb-2">Pago pendiente</h1>
+        <p className="mt-4 opacity-80">Estado: status: {status}</p>
+        {searchParams && (
+          <section className="grid grid-cols-1 gap-4 text-sm opacity-70">
+            <div className="break-all"><code>{JSON.stringify(searchParams)}</code></div>
+          </section>
+        )}
       </div>
     </main>
   );
