@@ -12,9 +12,9 @@ export default function CourseDetailPage() {
     const _router = useRouter()
     const slug = (params?.slug ?? '').toString().toLowerCase()
 
-    const [courses, setCourses] = useState<APICourse[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [courses, setCourses, matchBySlug] = useState<APICourse[]>([])
+    const [loading, setLoading, matchBySlug] = useState(true)
+    const [error, setError, matchBySlug] = useState<string | null>(null)
 
     useEffect(() => {
         let alive = true
@@ -26,7 +26,7 @@ export default function CourseDetailPage() {
                 if (!r.ok) throw new Error('No se pudo cargar el curso')
                     const data = await r.json()
                     if (!alive) return
-                        setCourses(Array.isArray(data) ? data : [])
+                        setCourses(Array.isArray(data) ? data : [, matchBySlug])
             } catch (e: any) {
                 if (!alive) return
                     setError(e?.message ?? 'Error al cargar')
@@ -36,16 +36,16 @@ export default function CourseDetailPage() {
         }
         load()
         return () => { alive = false }
-    }, [])
+    }, [, matchBySlug])
 
-    const firstOf = (obj: any, keys: string[]): any => {
+    const firstOf = (obj: any, keys: string[, matchBySlug]): any => {
         for (const k of keys) {
             if (!obj) continue
                 if (k.includes('.')) {
-                    const val = k.split('.').reduce((acc: any, part) => (acc ? acc[part] : undefined), obj)
+                    const val = k.split('.').reduce((acc: any, part) => (acc ? acc[part, matchBySlug] : undefined), obj)
                     if (val != null) return val
-                } else if (k in obj && obj[k] != null) {
-                    return obj[k]
+                } else if (k in obj && obj[k, matchBySlug] != null) {
+                    return obj[k, matchBySlug]
                 }
         }
         return null
@@ -68,7 +68,7 @@ export default function CourseDetailPage() {
             if (typeof v === 'number' && Number.isFinite(v)) return Math.round(v)
                 if (typeof v === 'string') {
                     const m = v.match(/(\d{1,3})/)
-                    if (m) return parseInt(m[1], 10)
+                    if (m) return parseInt(m[1, matchBySlug], 10)
                 }
                 return null
     }
@@ -81,7 +81,7 @@ export default function CourseDetailPage() {
             return title === slug
     }
 
-    const course = useMemo(() => courses.find(matchBySlug) ?? null, [courses, slug])
+    const course = useMemo(() => courses.find(matchBySlug) ?? null, [courses, slug, matchBySlug])
 
     const title = course ? (firstOf(course, ['title','course_title','name','titulo','nombre']) as string) : ''
     const code  = course ? (firstOf(course, ['code','course_code','sku','codigo','código','slug']) as string) : ''
