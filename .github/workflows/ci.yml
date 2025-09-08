@@ -49,12 +49,38 @@ jobs:
           CI: "true"
         run: npm run build
 
-      - name: Test /api/health handler (built)
+- name: Test /api/health handler (built)
         run: |
           node -e "
             (async () => {
-              const { GET } = require('./.next/server/app/api/health/route.js');
-              const res = await GET();
+              const mod = require('./.next/server/app/api/health/route.js');
+              const candidates = [
+                mod.GET,
+                mod.default,
+                mod.handler,
+                mod.handlers && mod.handlers.GET,
+                mod.routeModule && mod.routeModule.userland && mod.routeModule.userland.GET,
+              ].filter(Boolean);
+
+              if (!candidates.length) {
+                console.error('No GET-like export found. Keys:', Object.keys(mod));
+                process.exit(1);
+              }
+
+              const fn = candidates[0];
+              if (typeof fn !== 'function') {
+                console.error('Resolved handler is not a function:', fn);
+                process.exit(1);
+              }
+
+              // Node 20 tiene fetch/Request/Response globales.
+              const req = new Request('http://localhost/api/health');
+              const res = await fn(req, {});
+              if (!res || typeof res.json !== 'function') {
+                console.error('Handler did not return a Response-like object:', res);
+                process.exit(1);
+              }
+
               const data = await res.json();
               if (!data || data.ok !== true) {
                 console.error('Health not OK:', data);
