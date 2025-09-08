@@ -20,6 +20,7 @@ const poppins = Poppins({
   display: 'swap',
 })
 
+import PreviewBadge from '@/components/PreviewBadge';
 export const metadata = {
   title: 'OreTec',
   description: 'Formación en Prevención y Seguridad Laboral',
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <main>{children}</main>
     <Footer />
     <ScrollTop />
+      <PreviewBadge />
     </body>
     </html>
   )
