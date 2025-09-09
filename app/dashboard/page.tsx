@@ -1,5 +1,7 @@
 'use client'
 
+import AuthGate from "@/components/AuthGate";
+
 import ProfileEnsure from "@/components/ProfileEnsure";
 // app/dashboard/page.tsx
 
@@ -91,6 +93,7 @@ function IconByAccountType({ at }: { at: AccountType | null | undefined }) {
 }
 
 <ProfileEnsure />
+<AuthGate />
 export default function DashboardPage() {
     const supabase = supabaseBrowser()
     const [loading, setLoading] = useState(true)
