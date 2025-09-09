@@ -1,13 +1,28 @@
+## Flujo CI en español
+## - Usa Secrets del repositorio para todas las variables.
+## - Linter, typecheck, build y prueba del handler /api/health.
+
 name: CI
 
 on:
   push:
-    branches: ["**"]
   pull_request:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      ADMIN_BOOTSTRAP_EMAILS: ${{ secrets.ADMIN_BOOTSTRAP_EMAILS }}
+      MP_PUBLIC_KEY: ${{ secrets.MP_PUBLIC_KEY }}
+      MP_ACCESS_TOKEN: ${{ secrets.MP_ACCESS_TOKEN }}
+      NEXT_PUBLIC_MP_ENV: ${{ secrets.NEXT_PUBLIC_MP_ENV }}
+      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+      CI: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,7 +33,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install deps
+      - name: Instalar dependencias
         run: npm ci
 
       - name: Typecheck
@@ -28,26 +43,19 @@ jobs:
         run: npm run lint --max-warnings=0
 
       - name: Build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co"
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
         run: npm run build
 
-      - name: Test /api/health handler (built)
+      - name: Test /api/health (handler build)
         run: |
-          node -e " 
-            (async () => { 
-              const { GET } = require('./.next/server/app/api/health/route.js');
-              const res = await GET();
-              const data = await res.json();
-              if (!data || data.ok !== true) {
-                console.error('Health not OK:', data);
-                process.exit(1);
-              }
-              if (!(''env'' in data)) {
-                console.error('Missing env in health payload:', data);
-                process.exit(1);
-              }
+          node -e "
+            (async () => {
+              const mod = require('./.next/server/app/api/health/route.js');
+              const candidates = [mod.GET, mod.default, mod.handler, (mod.handlers && mod.handlers.GET)];
+              const h = candidates.find(Boolean);
+              if (typeof h !== 'function') { throw new Error('GET no es función en health/route.js'); }
+              const res = await h(); const data = await res.json();
+              if (!data || data.ok !== true) { throw new Error('Health not OK: ' + JSON.stringify(data)); }
+              if (!('env' in data)) { throw new Error('Missing env en payload: ' + JSON.stringify(data)); }
               console.log('Health OK:', data);
             })().catch((e) => { console.error(e); process.exit(1); });
           "
