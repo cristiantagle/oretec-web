@@ -1,5 +1,6 @@
 'use client'
 
+
 import AuthGate from "@/components/AuthGate";
 
 import ProfileEnsure from "@/components/ProfileEnsure";
@@ -39,6 +40,8 @@ function accountTypeToEs(at: AccountType | null | undefined): string {
 /** Icono por defecto (estudiante) */
 function StudentBadgeIcon() {
     return (
+      <AuthGate />
+      <ProfileEnsure />
         <svg viewBox="0 0 24 24" className="h-12 w-12 text-blue-900/80">
         <rect x="3" y="4" width="18" height="16" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
         <rect x="6" y="7" width="6" height="6" rx="3" className="fill-blue-200/60"/>
@@ -92,8 +95,6 @@ function IconByAccountType({ at }: { at: AccountType | null | undefined }) {
     }
 }
 
-<ProfileEnsure />
-<AuthGate />
 export default function DashboardPage() {
     const supabase = supabaseBrowser()
     const [loading, setLoading] = useState(true)
