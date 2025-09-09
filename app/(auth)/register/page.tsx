@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import SectionTitle from '@/components/SectionTitle'
 import { supabaseBrowser } from '@/lib/supabase/browser'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? (typeof window !== 'undefined' ? window.location.origin : 'https://oretec-web-9jgh.vercel.app');
+const __emailRedirectTo = SITE_URL + '/dashboard';
+
 
 type AccountType = 'individual' | 'company'
 
