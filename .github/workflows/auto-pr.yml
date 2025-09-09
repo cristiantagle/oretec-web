@@ -1,16 +1,16 @@
-name: Auto PR Bot
+name: Bot PR automático y auto-merge (ES)
 
 on:
   push:
     branches:
-      - "feat/**"
-      - "fix/**"
-      - "chore/**"
-      - "hotfix/**"
+      - 'feat/**'
+      - 'fix/**'
+      - 'chore/**'
+      - 'hotfix/**'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write        # necesario para actualizar ramas/PRs
+  pull-requests: write   # necesario para habilitar auto-merge
 
 jobs:
   auto-pr:
@@ -18,46 +18,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Create or Update PR
-        id: cpr
-        uses: peter-evans/create-pull-request@v6
+      # Crea o actualiza un PR desde la rama actual hacia main
+      - name: Crear/actualizar PR → main
+        id: pr
+        uses: repo-sync/pull-request@v2
         with:
-          base: main
-          branch: ${{ github.ref_name }}
-          title: "chore(bot): Auto PR → ${{ github.ref_name }} → main"
-          body: |
-            This PR was opened automatically by the bot.
-            - Auto-merge: **enabled (squash)**
-            - Vercel will attach a Preview in checks.
-          labels: |
-            preview
-            automated
-          draft: false
+          source_branch: "${{ github.ref_name }}"
+          destination_branch: "main"
+          pr_title: "Auto PR: ${{ github.ref_name }}"
+          pr_body: |
+            PR automático desde **${{ github.ref_name }}** hacia **main**.
+            - Creado por workflow en español.
+            - Se activará auto-merge (squash) cuando el CI pase 👍
+          pr_label: "auto-pr"
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Enable auto-merge (squash)
-        if: steps.cpr.outputs.pull-request-number != 
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: squash
-
-      - name: Comment with instructions
-        if: steps.cpr.outputs.pull-request-url != 
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr = ${{ steps.cpr.outputs.pull-request-number }};
-            const body = `🤖 Auto-PR enabled.
-            - Branch: \`${{ github.ref_name }}\`
-            - Auto-merge: **enabled (squash)**
-            - CI must pass for merge.
-            `;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr,
-              body
-            });
+      # Habilita auto-merge (squash). 'gh' viene preinstalado en ubuntu-latest.
+      - name: Activar auto-merge (squash)
+        if: ${{ steps.pr.outputs.pr_number != '' }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: |
+          echo "PR #${{ steps.pr.outputs.pr_number }}: habilitando auto-merge (squash)…"
+          gh pr merge ${{ steps.pr.outputs.pr_number }} --auto --squash --delete-branch=false
