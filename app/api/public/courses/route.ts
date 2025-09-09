@@ -1,3 +1,7 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
+
 // app/api/public/courses/route.ts
 import { supabaseServer } from '@/lib/supabase/server'
 
