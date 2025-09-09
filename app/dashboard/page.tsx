@@ -1,3 +1,4 @@
+import ProfileEnsure from "@/components/ProfileEnsure";
 // app/dashboard/page.tsx
 'use client'
 
@@ -88,6 +89,7 @@ function IconByAccountType({ at }: { at: AccountType | null | undefined }) {
     }
 }
 
+<ProfileEnsure />
 export default function DashboardPage() {
     const supabase = supabaseBrowser()
     const [loading, setLoading] = useState(true)
