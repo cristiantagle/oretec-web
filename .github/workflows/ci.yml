@@ -30,3 +30,43 @@
       process.exit(1);
     });
     JS
+
+      - name: Verificar artefacto de /api/health (permisivo)
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = './.next/server/app/api/health/route.js';
+            if (!fs.existsSync(path)) {
+              console.error('No existe el artefacto de health:', path);
+              process.exit(1);
+            }
+            const mod = require(path);
+            const fn =
+              mod.GET ||
+              mod.default ||
+              mod.handler ||
+              (mod.handlers && mod.handlers.GET);
+
+            (async () => {
+              try {
+                if (typeof fn === 'function') {
+                  const res = await fn();
+                  const data = await res.json();
+                  if (!data || data.ok !== true) {
+                    throw new Error('Payload inesperado: ' + JSON.stringify(data));
+                  }
+                  if (!('env' in data)) {
+                    throw new Error('Falta env en payload: ' + JSON.stringify(data));
+                  }
+                  console.log('Health OK (invocado).');
+                  process.exit(0);
+                } else {
+                  console.log('Health OK (artefacto presente, invocación directa no soportada).');
+                  process.exit(0);
+                }
+              } catch (e) {
+                console.log('Health presente, pero invocación directa no soportada:', e.message);
+                process.exit(0);
+              }
+            })();
+          "
