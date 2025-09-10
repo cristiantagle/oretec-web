@@ -10,9 +10,15 @@ import { supabaseBrowser } from '@/lib/supabase/browser'
 type AccountType = 'individual' | 'company'
 
 function RegisterInner() {
+<<<<<<< Updated upstream
     const router = useRouter()
     const search = useSearchParams()
     const supabase = supabaseBrowser()
+=======
+  const router = useRouter()
+  const search = useSearchParams()
+  const supabase = supabaseBrowser()
+>>>>>>> Stashed changes
 
     const initialType = useMemo<AccountType>(() => {
         const t = (search.get('type') || '').toLowerCase()
@@ -28,6 +34,7 @@ function RegisterInner() {
     const [loading, setLoading] = useState(false)
     const [msg, setMsg] = useState<string>('')
 
+<<<<<<< Updated upstream
     useEffect(() => {
         // Si cambia el query param (navegación interna), refleja el valor
         setType(initialType)
@@ -36,6 +43,48 @@ function RegisterInner() {
     function flash(s: string) {
         setMsg(s)
         setTimeout(() => setMsg(''), 3000)
+=======
+  useEffect(() => {
+    setType(initialType)
+  }, [initialType])
+
+  function flash(s: string) {
+    setMsg(s)
+    setTimeout(() => setMsg(''), 3000)
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!fullName.trim()) return flash('Ingresa tu nombre completo.')
+    if (!email.trim()) return flash('Ingresa tu correo.')
+    if (password.length < 6) return flash('La contraseña debe tener al menos 6 caracteres.')
+    if (password !== confirm) return flash('Las contraseñas no coinciden.')
+    if (type === 'company' && !companyName.trim()) return flash('Ingresa el nombre de la empresa.')
+
+    setLoading(true)
+    try {
+      const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: site.replace(/\/$/, '') + '/dashboard',
+          data: {
+            full_name: fullName,
+            account_type: type,
+            company_name: type === 'company' ? companyName : null,
+          },
+        },
+      })
+      if (error) throw error
+
+      flash('Registro exitoso. Revisa tu correo para confirmar la cuenta.')
+      setTimeout(() => router.replace('/login'), 800)
+    } catch (e: any) {
+      flash(e?.message || 'No se pudo registrar')
+    } finally {
+      setLoading(false)
+>>>>>>> Stashed changes
     }
 
     async function onSubmit(e: React.FormEvent) {
@@ -82,6 +131,7 @@ function RegisterInner() {
 
         {/* Selector de tipo de cuenta */}
         <div className="mt-4 grid grid-cols-2 gap-2">
+<<<<<<< Updated upstream
         <button
         type="button"
         onClick={() => setType('individual')}
@@ -100,6 +150,26 @@ function RegisterInner() {
         >
         <span className="text-lg">🏢</span> Empresa
         </button>
+=======
+          <button
+            type="button"
+            onClick={() => setType('individual')}
+            className={`btn-secondary flex items-center justify-center gap-2 py-2 ${
+              type === 'individual' ? 'ring-2 ring-blue-300' : ''
+            }`}
+          >
+            <span className="text-lg">👤</span> Particular
+          </button>
+          <button
+            type="button"
+            onClick={() => setType('company')}
+            className={`btn-secondary flex items-center justify-center gap-2 py-2 ${
+              type === 'company' ? 'ring-2 ring-blue-300' : ''
+            }`}
+          >
+            <span className="text-lg">🏢</span> Empresa
+          </button>
+>>>>>>> Stashed changes
         </div>
 
         {/* Mensaje flash */}
@@ -196,9 +266,17 @@ function RegisterInner() {
 }
 
 export default function RegisterPage() {
+<<<<<<< Updated upstream
     return (
         <Suspense fallback={<div>Cargando…</div>}>
         <RegisterInner />
         </Suspense>
     )
+=======
+  return (
+    <Suspense fallback={<div>Cargando…</div>}>
+      <RegisterInner />
+    </Suspense>
+  )
+>>>>>>> Stashed changes
 }
