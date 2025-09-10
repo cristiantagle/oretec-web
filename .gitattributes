@@ -1,0 +1,2 @@
+components/BannerStrip.tsx merge=keep-ours
+public/img/hero/* merge=keep-ours

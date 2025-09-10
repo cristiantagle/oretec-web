@@ -1,0 +1,71 @@
+name: ci-min
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      # Typecheck si existe script "typecheck"; si no, seguir.
+      - name: Typecheck (best-effort)
+        run: |
+          if npm run | grep -qE 'typecheck'; then
+            npm run -s typecheck
+          else
+            echo "No hay script typecheck; continuo."
+          fi
+
+      # Verificar secrets requeridos para build
+      - name: Verificar env para build
+        id: envcheck
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+        run: |
+          missing=0
+          for k in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_SITE_URL; do
+            v="${!k}"
+            if [ -z "$v" ]; then
+              echo "Falta secret: $k"
+              missing=$((missing+1))
+            fi
+          done
+          if [ "$missing" -eq 0 ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Build sólo si hay env completos
+      - name: Build (Next.js)
+        if: steps.envcheck.outputs.ok == 'true'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+        run: |
+          npm run build
+
+      - name: Nota si se omitió el build
+        if: steps.envcheck.outputs.ok != 'true'
+        run: |
+          echo "::notice::Build omitido: faltan secrets en GitHub. Esto NO bloquea el PR."
