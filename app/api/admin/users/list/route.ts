@@ -1,14 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabaseServer } from "@/lib/supabase/server";
 
-/**
- * Estrategia de acceso:
- * - Si hay cookie "admin_auth=1" → acceso total (superadmin).
- * - Si no, exige Authorization: Bearer <token> y valida que el perfil tenga account_type='admin'.
- *
- * Nota: Todas las lecturas se hacen con service-role (supabaseServer) para evitar RLS.
- */
-
 function parseCookies(cookieHeader: string | null | undefined): Record<string,string> {
   const out: Record<string,string> = {};
   if (!cookieHeader) return out;
@@ -31,42 +23,33 @@ export async function GET(req: Request) {
       return new Response(JSON.stringify({ error: "missing_env" }), { status: 500 });
     }
 
-    // 1) ¿Tiene cookie superadmin?
     const cookies = parseCookies(req.headers.get("cookie"));
     const hasSuperadmin = cookies["admin_auth"] === "1";
 
-    let requesterUserId: string | null = null;
     let requesterIsAdmin = false;
 
     if (hasSuperadmin) {
-      requesterIsAdmin = true; // cookie autoriza todo
+      requesterIsAdmin = true;
     } else {
-      // 2) Validar Authorization Bearer y rol admin por Supabase
       const raw = req.headers.get("authorization") ?? req.headers.get("Authorization");
       if (!raw) {
         return new Response(JSON.stringify({ error: "not_authenticated" }), { status: 401 });
       }
       const authHeader = raw.startsWith("Bearer ") ? raw : `Bearer ${raw}`;
-
       const asUser = createClient(url, anon, {
         global: { headers: { Authorization: authHeader } },
         auth: { persistSession: false, autoRefreshToken: false },
       });
-
       const { data: userData, error: userErr } = await asUser.auth.getUser();
       if (userErr || !userData?.user) {
         return new Response(JSON.stringify({ error: "invalid_session" }), { status: 401 });
       }
-      requesterUserId = userData.user.id;
-
-      // Verificar en perfiles
       const adminSrv = supabaseServer();
       const { data: me, error: meErr } = await adminSrv
         .from("profiles")
         .select("id, account_type")
-        .eq("id", requesterUserId)
+        .eq("id", userData.user.id)
         .maybeSingle();
-
       if (meErr) {
         return new Response(JSON.stringify({ error: "db_error", detail: meErr.message }), { status: 500 });
       }
@@ -80,7 +63,6 @@ export async function GET(req: Request) {
       return new Response(JSON.stringify({ error: "forbidden" }), { status: 403 });
     }
 
-    // 3) Parámetros búsqueda/paginación
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const pageSizeRaw = Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10));
