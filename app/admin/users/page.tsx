@@ -1,306 +1,235 @@
 // app/admin/users/page.tsx
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase/browser'
 
-type AccountType = 'admin' | 'instructor' | 'company' | 'student'
-type UserRow = {
+type Row = {
   id: string
   email: string | null
   full_name: string | null
-  rut: string | null
   company_name: string | null
-  account_type: AccountType | null
+  account_type: 'admin' | 'instructor' | 'company' | 'student' | null
   phone: string | null
-  created_at: string | null
+  rut: string | null
+  address: string | null
+  nationality: string | null
+  profession: string | null
   updated_at: string | null
 }
 
-function accountTypeToEs(at: AccountType | null | undefined): string {
-  switch (at) {
-    case 'admin': return 'Administrador'
-    case 'instructor': return 'Instructor'
-    case 'company': return 'Empresa'
-    case 'student':
-    default: return 'Estudiante'
-  }
-}
-
 export default function AdminUsersPage() {
-  const supabase = useMemo(() => supabaseBrowser(), [])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [rows, setRows] = useState<UserRow[]>([])
-  const [search, setSearch] = useState('')
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
-  const [total, setTotal] = useState(0)
+  const router = useRouter()
+  const params = useSearchParams()
+  const supabase = supabaseBrowser()
 
-  // Edición local del rol por fila (sin perder el valor si navegas)
-  const [pendingRole, setPendingRole] = useState<Record<string, AccountType>>({})
-  const [savingId, setSavingId] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [page, setPage] = useState<number>(parseInt(params.get('page') || '1', 10) || 1)
+  const [pageSize, setPageSize] = useState<number>(parseInt(params.get('pageSize') || '20', 10) || 20)
+  const [search, setSearch] = useState<string>(params.get('search') || '')
+  const [rows, setRows] = useState<Row[]>([])
+  const [total, setTotal] = useState<number>(0)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
 
   const abortRef = useRef(new AbortController())
-  const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
-  function setRowPendingRole(userId: string, value: AccountType) {
-    setPendingRole(prev => ({ ...prev, [userId]: value }))
+  async function getBearer(): Promise<string | null> {
+    try {
+      const { data } = await supabase.auth.getSession()
+      return data?.session?.access_token ?? null
+    } catch {
+      return null
+    }
   }
 
-  async function fetchUsers(opts?: { page?: number }) {
-    const p = opts?.page ?? page
-    setLoading(true); setError(null)
+  async function fetchList(p = page) {
+    setLoading(true)
+    setError('')
+    abortRef.current = new AbortController()
     try {
-      const { data: sess, error: sessErr } = await supabase.auth.getSession()
-      if (sessErr) throw sessErr
-        const token = sess.session?.access_token
-        if (!token) throw new Error('No autenticado')
+      const token = await getBearer()
 
-          const params = new URLSearchParams({ page: String(p), pageSize: String(pageSize) })
-          if (search.trim()) params.set('search', search.trim())
+      const qs = new URLSearchParams({
+        page: String(p),
+        pageSize: String(pageSize)
+      })
+      if (search.trim()) qs.set('search', search.trim())
 
-            const r = await fetch(`/api/admin/users/list?${params.toString()}`, {
-              headers: { Authorization: `Bearer ${token}` },
-              cache: 'no-store',
-              signal: abortRef.current.signal,
-            })
-            const j = await r.json()
-            if (!r.ok) throw new Error(j?.error || j?.detail || `status_${r.status}`)
+      const r = await fetch(`/api/admin/users/list?${qs.toString()}`, {
+        method: 'GET',
+        credentials: 'include',             // ← ENVÍA COOKIE admin_auth=1
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        cache: 'no-store',
+        signal: abortRef.current.signal
+      })
 
-              const items = (j.items as UserRow[]) ?? []
-              setRows(items)
-              setTotal(j.total as number)
-              setPage(j.page as number)
+      const text = await r.text()
+      let j: any = {}
+      try { j = text ? JSON.parse(text) : {} } catch { /* ignore */ }
 
-              // Actualiza el buffer pendiente con el rol actual
-              setPendingRole(prev => {
-                const next: Record<string, AccountType> = { ...prev }
-                for (const it of items) {
-                  const at = (it.account_type ?? 'student') as AccountType
-                  if (!next[it.id]) next[it.id] = at
-                }
-                return next
-              })
-    } catch (e: any) {
-      if (e?.name !== 'AbortError') {
-        setError(e?.message || 'No se pudo cargar la lista')
+      if (!r.ok) {
+        setRows([])
+        setTotal(0)
+        const msg = j?.error ? `${j.error}${j.detail ? ' - ' + j.detail : ''}` : `HTTP ${r.status}`
+        setError(msg || 'Error')
+        return
       }
+
+      setRows(Array.isArray(j.items) ? j.items : [])
+      setTotal(typeof j.total === 'number' ? j.total : 0)
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') setError(e?.message || 'Error de red')
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    abortRef.current = new AbortController()
-    fetchUsers({ page: 1 })
-    return () => abortRef.current.abort()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageSize])
-
-  async function onSaveRole(userId: string) {
-    const nextRole = (pendingRole[userId] ?? 'student') as AccountType
-    setSavingId(userId); setError(null)
+  async function changeRole(id: string, role: 'admin'|'instructor'|'company'|'student') {
+    setError('')
     try {
-      const { data: sess, error: sessErr } = await supabase.auth.getSession()
-      if (sessErr) throw sessErr
-        const token = sess.session?.access_token
-        if (!token) throw new Error('No autenticado')
+      const token = await getBearer()
+      const r = await fetch('/api/admin/users/set-role', {
+        method: 'POST',
+        credentials: 'include',             // ← ENVÍA COOKIE admin_auth=1
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}) // ← SI HAY, TAMBIÉN BEARER
+        },
+        body: JSON.stringify({ id, role }),
+      })
 
-          const r = await fetch('/api/admin/users/set-role', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ user_id: userId, account_type: nextRole }),
-          })
-          const j = await r.json()
-          if (!r.ok) throw new Error(j?.error || j?.detail || 'set_role_error')
+      const text = await r.text()
+      let j: any = {}
+      try { j = text ? JSON.parse(text) : {} } catch { /* ignore */ }
 
-            setRows(prev => prev.map(x => x.id === userId
-            ? { ...x, account_type: nextRole, updated_at: new Date().toISOString() }
-            : x))
+      if (!r.ok) {
+        const msg = j?.error ? `${j.error}${j.detail ? ' - ' + j.detail : ''}` : `HTTP ${r.status}`
+        setError(msg || 'Error')
+        return
+      }
+
+      // refrescar lista
+      fetchList(page)
     } catch (e: any) {
-      setError(e?.message || 'No se pudo guardar el rol')
-    } finally {
-      setSavingId(null)
+      setError(e?.message || 'Error de red')
     }
   }
 
-  async function onDeleteUser(userId: string) {
-    if (!confirm('¿Seguro que quieres eliminar este usuario? Esta acción no se puede deshacer.')) return
-      setDeletingId(userId); setError(null)
-      try {
-        const { data: sess, error: sessErr } = await supabase.auth.getSession()
-        if (sessErr) throw sessErr
-          const token = sess.session?.access_token
-          if (!token) throw new Error('No autenticado')
+  useEffect(() => {
+    fetchList(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageSize, search])
 
-            const r = await fetch('/api/admin/users/delete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-              body: JSON.stringify({ user_id: userId }),
-            })
-            const j = await r.json()
-            if (!r.ok) throw new Error(j?.error || j?.detail || 'delete_error')
-
-              setRows(prev => prev.filter(x => x.id !== userId))
-              setPendingRole(prev => {
-                const { [userId]: _, ...rest } = prev
-                return rest
-              })
-              setTotal(t => Math.max(0, t - 1))
-      } catch (e: any) {
-        setError(e?.message || 'No se pudo eliminar el usuario')
-      } finally {
-        setDeletingId(null)
-      }
-  }
+  useEffect(() => {
+    return () => abortRef.current.abort()
+  }, [])
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-    <div className="mb-6 flex items-center justify-between">
-    <h1 className="text-2xl font-bold" style={{ color: '#1E3A8A' }}>
-    Administración de Usuarios
-    </h1>
-    <div className="flex items-center gap-2">
-    <select
-    className="rounded border px-2 py-1 text-sm"
-    value={pageSize}
-    onChange={(e) => setPageSize(Number(e.target.value))}
-    >
-    <option value={10}>10</option>
-    <option value={20}>20</option>
-    <option value={50}>50</option>
-    </select>
-    <button
-    className="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-50"
-    onClick={() => fetchUsers()}
-    disabled={loading}
-    >
-    {loading ? 'Actualizando…' : 'Actualizar'}
-    </button>
-    </div>
-    </div>
-
-    <div className="mb-4 flex items-center gap-2">
-    <input
-    className="w-full max-w-md rounded border px-3 py-2"
-    placeholder="Buscar por nombre, RUT, email o empresa…"
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    onKeyDown={(e) => { if (e.key === 'Enter') fetchUsers({ page: 1 }) }}
-    />
-    <button
-    className="rounded bg-blue-900 px-4 py-2 text-white hover:bg-blue-800"
-    onClick={() => fetchUsers({ page: 1 })}
-    >
-    Buscar
-    </button>
-    </div>
-
-    {error && (
-      <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-      {error}
+    <main className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold" style={{ color: '#1E3A8A' }}>Administración de Usuarios</h1>
+        <Link href="/dashboard" className="btn-secondary">← Volver</Link>
       </div>
-    )}
 
-    <div className="overflow-x-auto rounded-xl border">
-    <table className="min-w-full text-sm">
-    <thead className="bg-slate-50 text-left text-slate-600">
-    <tr>
-    <th className="px-3 py-2">Nombre</th>
-    <th className="px-3 py-2">RUT</th>
-    <th className="px-3 py-2">Correo</th>
-    <th className="px-3 py-2">Empresa</th>
-    <th className="px-3 py-2">Rol</th>
-    <th className="px-3 py-2">Teléfono</th>
-    <th className="px-3 py-2">Actualizado</th>
-    <th className="px-3 py-2">Acciones</th>
-    </tr>
-    </thead>
-    <tbody>
-    {rows.map(u => {
-      const value = (pendingRole[u.id] ?? u.account_type ?? 'student') as AccountType
-      return (
-        <tr key={u.id} className="border-t">
-        <td className="px-3 py-2">{u.full_name || '-'}</td>
-        <td className="px-3 py-2">{u.rut || '-'}</td>
-        <td className="px-3 py-2">{u.email || '-'}</td>
-        <td className="px-3 py-2">{u.company_name || '-'}</td>
-        <td className="px-3 py-2">
-        <div className="flex items-center gap-2">
-        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-900 ring-1 ring-blue-200">
-        {accountTypeToEs(value)}
-        </span>
+      <div className="mb-4 flex items-center gap-2">
         <select
-        className="rounded border px-2 py-1 text-sm"
-        value={value}
-        onChange={(e) => setRowPendingRole(u.id, e.target.value as AccountType)}
-        disabled={savingId === u.id}
+          className="rounded border px-2 py-1"
+          value={pageSize}
+          onChange={e => setPageSize(parseInt(e.target.value, 10))}
         >
-        <option value="student">Estudiante</option>
-        <option value="company">Empresa</option>
-        <option value="instructor">Instructor</option>
-        <option value="admin">Administrador</option>
+          {[10,20,50,100].map(n => <option key={n} value={n}>{n}</option>)}
         </select>
-        </div>
-        </td>
-        <td className="px-3 py-2">{u.phone || '-'}</td>
-        <td className="px-3 py-2">{u.updated_at ? new Date(u.updated_at).toLocaleString() : '-'}</td>
-        <td className="px-3 py-2">
-        <div className="flex items-center gap-2">
-        <button
-        className="rounded bg-blue-900 px-3 py-1 text-white text-xs hover:bg-blue-800 disabled:opacity-50"
-        onClick={() => onSaveRole(u.id)}
-        disabled={savingId === u.id}
-        title="Guardar cambios de rol"
-        >
-        {savingId === u.id ? 'Guardando…' : 'Guardar'}
+        <button className="btn-secondary" onClick={() => fetchList(page)} disabled={loading}>
+          {loading ? 'Actualizando…' : 'Actualizar'}
         </button>
-        <button
-        className="rounded border border-red-300 px-3 py-1 text-red-700 text-xs hover:bg-red-50 disabled:opacity-50"
-        onClick={() => onDeleteUser(u.id)}
-        disabled={deletingId === u.id}
-        title="Eliminar usuario"
-        >
-        {deletingId === u.id ? 'Eliminando…' : 'Borrar'}
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <input
+            className="rounded border px-3 py-2"
+            placeholder="Buscar por nombre, RUT, email o empresa…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <button className="btn-secondary" onClick={() => fetchList(1)}>Buscar</button>
         </div>
-        </td>
-        </tr>
-      )
-    })}
-    {rows.length === 0 && !loading && (
-      <tr>
-      <td colSpan={8} className="px-3 py-6 text-center text-slate-500">
-      Sin resultados.
-      </td>
-      </tr>
-    )}
-    </tbody>
-    </table>
-    </div>
+      </div>
 
-    <div className="mt-4 flex items-center justify-between text-sm">
-    <div>Total: <strong>{total}</strong></div>
-    <div className="flex items-center gap-2">
-    <button
-    className="rounded border px-3 py-1 disabled:opacity-50"
-    onClick={() => fetchUsers({ page: Math.max(1, page - 1) })}
-    disabled={page <= 1 || loading}
-    >
-    Anterior
-    </button>
-    <span>Página {page} de {totalPages}</span>
-    <button
-    className="rounded border px-3 py-1 disabled:opacity-50"
-    onClick={() => fetchUsers({ page: Math.min(totalPages, page + 1) })}
-    disabled={page >= totalPages || loading}
-    >
-    Siguiente
-    </button>
-    </div>
-    </div>
+      {error && (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="overflow-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left border-b">
+              <th className="py-2 pr-4">Nombre</th>
+              <th className="py-2 pr-4">RUT</th>
+              <th className="py-2 pr-4">Correo</th>
+              <th className="py-2 pr-4">Empresa</th>
+              <th className="py-2 pr-4">Rol</th>
+              <th className="py-2 pr-4">Teléfono</th>
+              <th className="py-2 pr-4">Actualizado</th>
+              <th className="py-2 pr-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={8} className="py-8 text-center text-slate-500">
+                  {loading ? 'Cargando…' : 'Sin resultados.'}
+                </td>
+              </tr>
+            )}
+            {rows.map(r => (
+              <tr key={r.id} className="border-b">
+                <td className="py-2 pr-4">{r.full_name || '-'}</td>
+                <td className="py-2 pr-4">{r.rut || '-'}</td>
+                <td className="py-2 pr-4">{r.email || '-'}</td>
+                <td className="py-2 pr-4">{r.company_name || '-'}</td>
+                <td className="py-2 pr-4">{r.account_type || '-'}</td>
+                <td className="py-2 pr-4">{r.phone || '-'}</td>
+                <td className="py-2 pr-4">{r.updated_at ? new Date(r.updated_at).toLocaleString() : '-'}</td>
+                <td className="py-2 pr-4">
+                  <div className="flex gap-2">
+                    {(['admin','instructor','company','student'] as const).map(role => (
+                      <button
+                        key={role}
+                        className="btn-secondary"
+                        onClick={() => changeRole(r.id, role)}
+                        title={`Cambiar a ${role}`}
+                      >
+                        {role}
+                      </button>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          className="btn-secondary"
+          onClick={() => { const np = Math.max(1, page - 1); setPage(np); fetchList(np) }}
+          disabled={page <= 1 || loading}
+        >
+          ← Anterior
+        </button>
+        <div className="px-2">Página {page}</div>
+        <button
+          className="btn-secondary"
+          onClick={() => { const np = page + 1; if ((page * pageSize) < total) { setPage(np); fetchList(np) } }}
+          disabled={(page * pageSize) >= total || loading}
+        >
+          Siguiente →
+        </button>
+        <div className="ml-auto text-slate-600">Total: {total}</div>
+      </div>
     </main>
   )
 }
