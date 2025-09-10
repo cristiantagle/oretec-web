@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
           const params = new URLSearchParams({ page: String(p), pageSize: String(pageSize) })
           if (search.trim()) params.set('search', search.trim())
 
-            const r = await fetch(`/api/admin/users/list?${params.toString(, { credentials: 'include' })}`, {
+            const r = await fetch(`/api/admin/users/list?${params.toString()}`, {
               headers: { Authorization: `Bearer ${token}` },
               cache: 'no-store',
               signal: abortRef.current.signal,
