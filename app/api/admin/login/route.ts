@@ -1,41 +1,34 @@
-import { NextResponse } from "next/server";
-
-export const dynamic = "force-dynamic";
-
-export async function GET() {
-    return NextResponse.json({ ok: true, method: "GET" });
-}
-
-export async function OPTIONS() {
-    return NextResponse.json({}, { status: 204 });
-}
+import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function POST(req: Request) {
-    const { token } = await req.json().catch(() => ({ token: "" }));
-    const expected = process.env.ADMIN_TOKEN;
+  try {
+    const { token, password } = await req.json().catch(() => ({} as any))
+    const provided = token || password
+    const expected = process.env.ADMIN_TOKEN
 
     if (!expected) {
-        return NextResponse.json(
-            { ok: false, error: "ADMIN_TOKEN no configurado en el servidor" },
-            { status: 500 }
-        );
+      return NextResponse.json({ error: 'ADMIN_TOKEN not configured' }, { status: 500 })
+    }
+    if (!provided || provided !== expected) {
+      return NextResponse.json({ error: 'invalid_credentials' }, { status: 401 })
     }
 
-    if (token !== expected) {
-        return NextResponse.json(
-            { ok: false, error: "Token inválido" },
-            { status: 401 }
-        );
-    }
+    cookies().set({
+      name: 'admin_auth',
+      value: '1',
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,   // en Vercel es HTTPS
+      path: '/',      // visible para todo el sitio y APIs
+      maxAge: 60 * 60 * 8, // 8h
+    })
 
-    const res = NextResponse.json({ ok: true });
-    res.cookies.set("admin_auth", "1", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 8, // 8 horas
-    });
-
-    return res;
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: 'unexpected', detail: e?.message ?? String(e) },
+      { status: 500 }
+    )
+  }
 }
