@@ -29,9 +29,9 @@ export async function POST(req: Request) {
 
     // 4) Email requerido
     const email =
-    (u.email as string | null | undefined) ??
-    (u.user_metadata?.email as string | null | undefined) ??
-    null
+      (u.email as string | null | undefined) ??
+      (u.user_metadata?.email as string | null | undefined) ??
+      null
     if (!email) {
       return new Response(JSON.stringify({ error: 'no_email_in_session' }), { status: 400 })
     }
@@ -41,7 +41,11 @@ export async function POST(req: Request) {
     const company_name_raw = (u.user_metadata?.company_name ?? null) as string | null
     const at_raw           = (u.user_metadata?.account_type ?? null) as string | null
 
-    // Nuevos campos (si algún día los pones en user_metadata)
+    // NUEVO: phone y avatar_url
+    const phone_raw       = (u.user_metadata?.phone ?? null) as string | null
+    const avatar_url_raw  = (u.user_metadata?.avatar_url ?? null) as string | null
+
+    // Nuevos campos adicionales
     const rut_raw         = (u.user_metadata?.rut ?? null) as string | null
     const address_raw     = (u.user_metadata?.address ?? null) as string | null
     const birth_date_raw  = (u.user_metadata?.birth_date ?? null) as string | null // 'YYYY-MM-DD'
@@ -61,10 +65,10 @@ export async function POST(req: Request) {
 
     // 6) ¿Existe?
     const { data: existing, error: selErr } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', u.id)
-    .maybeSingle()
+      .from('profiles')
+      .select('*')
+      .eq('id', u.id)
+      .maybeSingle()
     if (selErr) {
       return new Response(JSON.stringify({ error: 'DB error (select)', detail: selErr.message }), { status: 500 })
     }
@@ -77,56 +81,64 @@ export async function POST(req: Request) {
         updated_at: new Date().toISOString(),
       }
       if (full_name_raw)    insertPayload.full_name = full_name_raw
-        if (company_name_raw) insertPayload.company_name = company_name_raw
-          if (account_type)     insertPayload.account_type = account_type
+      if (company_name_raw) insertPayload.company_name = company_name_raw
+      if (account_type)     insertPayload.account_type = account_type
 
-            if (rut_raw)         insertPayload.rut = rut_raw
-              if (address_raw)     insertPayload.address = address_raw
-                if (birth_date_raw)  insertPayload.birth_date = birth_date_raw
-                  if (nationality_raw) insertPayload.nationality = nationality_raw
-                    if (profession_raw)  insertPayload.profession = profession_raw
+      // NUEVO
+      if (phone_raw)       insertPayload.phone = phone_raw
+      if (avatar_url_raw)  insertPayload.avatar_url = avatar_url_raw
 
-                      const { data, error: insErr } = await supabase
-                      .from('profiles')
-                      .insert(insertPayload)
-                      .select('*')
-                      .single()
-                      if (insErr) {
-                        return new Response(JSON.stringify({ error: 'DB error (insert)', detail: insErr.message }), { status: 500 })
-                      }
-                      return Response.json({ ok: true, created: true, profile: data })
+      if (rut_raw)         insertPayload.rut = rut_raw
+      if (address_raw)     insertPayload.address = address_raw
+      if (birth_date_raw)  insertPayload.birth_date = birth_date_raw
+      if (nationality_raw) insertPayload.nationality = nationality_raw
+      if (profession_raw)  insertPayload.profession = profession_raw
+
+      const { data, error: insErr } = await supabase
+        .from('profiles')
+        .insert(insertPayload)
+        .select('*')
+        .single()
+      if (insErr) {
+        return new Response(JSON.stringify({ error: 'DB error (insert)', detail: insErr.message }), { status: 500 })
+      }
+      return Response.json({ ok: true, created: true, profile: data })
     }
 
     // 7B) Sí existe → NO pisar valores; solo rellenar nulls
     const patch: Record<string, any> = {}
     if (existing.email == null) patch.email = email
-      if (existing.full_name == null && full_name_raw) patch.full_name = full_name_raw
-        if (existing.account_type == null && account_type) patch.account_type = account_type
-          if (existing.company_name == null && company_name_raw) patch.company_name = company_name_raw
+    if (existing.full_name == null && full_name_raw) patch.full_name = full_name_raw
+    if (existing.account_type == null && account_type) patch.account_type = account_type
+    if (existing.company_name == null && company_name_raw) patch.company_name = company_name_raw
 
-            if (existing.rut == null && rut_raw) patch.rut = rut_raw
-              if (existing.address == null && address_raw) patch.address = address_raw
-                if (existing.birth_date == null && birth_date_raw) patch.birth_date = birth_date_raw
-                  if (existing.nationality == null && nationality_raw) patch.nationality = nationality_raw
-                    if (existing.profession == null && profession_raw) patch.profession = profession_raw
+    // NUEVO
+    if (existing.phone == null && phone_raw) patch.phone = phone_raw
+    if (existing.avatar_url == null && avatar_url_raw) patch.avatar_url = avatar_url_raw
 
-                      if (Object.keys(patch).length > 0) {
-                        patch.updated_at = new Date().toISOString()
-                        const { data, error: updErr } = await supabase
-                        .from('profiles')
-                        .update(patch)
-                        .eq('id', u.id)
-                        .select('*')
-                        .single()
-                        if (updErr) {
-                          return new Response(JSON.stringify({ error: 'DB error (update ensure)', detail: updErr.message }), {
-                            status: 500,
-                          })
-                        }
-                        return Response.json({ ok: true, created: false, profile: data })
-                      }
+    if (existing.rut == null && rut_raw) patch.rut = rut_raw
+    if (existing.address == null && address_raw) patch.address = address_raw
+    if (existing.birth_date == null && birth_date_raw) patch.birth_date = birth_date_raw
+    if (existing.nationality == null && nationality_raw) patch.nationality = nationality_raw
+    if (existing.profession == null && profession_raw) patch.profession = profession_raw
 
-                      return Response.json({ ok: true, created: false, profile: existing })
+    if (Object.keys(patch).length > 0) {
+      patch.updated_at = new Date().toISOString()
+      const { data, error: updErr } = await supabase
+        .from('profiles')
+        .update(patch)
+        .eq('id', u.id)
+        .select('*')
+        .single()
+      if (updErr) {
+        return new Response(JSON.stringify({ error: 'DB error (update ensure)', detail: updErr.message }), {
+          status: 500,
+        })
+      }
+      return Response.json({ ok: true, created: false, profile: data })
+    }
+
+    return Response.json({ ok: true, created: false, profile: existing })
   } catch (e: any) {
     return new Response(JSON.stringify({ error: 'unexpected', detail: e?.message || String(e) }), { status: 500 })
   }
