@@ -163,6 +163,9 @@ export default function DashboardPage() {
         >
         {loading ? 'Actualizando…' : 'Actualizar'}
         </button>
+  <div class="mt-4">
+    <Link href="/dashboard/company/participants" class="btn-primary">Agregar Estudiantes</Link>
+  </div>
         </header>
 
         {/* Tarjeta tipo "carnet" */}
