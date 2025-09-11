@@ -1,17 +1,6 @@
-#!/bin/bash
-set -e
-
-BRANCH="fix/admin-role-dropdown-$(date +%Y%m%d-%H%M%S)"
-
-echo "🪄 Creando rama $BRANCH…"
-git stash push -m "auto-stash-before-$BRANCH" --include-untracked || true
-git checkout main
-git pull origin main
-git checkout -b "$BRANCH"
-
-cat > app/admin/users/page.tsx <<'TS'
 // app/admin/users/page.tsx
-'use client'
+
+"use client"
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
@@ -74,32 +63,32 @@ export default function AdminUsersPage() {
 
       const qs = new URLSearchParams({
         page: String(p),
-                                     pageSize: String(pageSize)
+        pageSize: String(pageSize)
       })
       if (search.trim()) qs.set('search', search.trim())
 
-        const r = await fetch(`/api/admin/users/list?${qs.toString()}`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          cache: 'no-store',
-          signal: abortRef.current.signal
-        })
+      const r = await fetch(`/api/admin/users/list?${qs.toString()}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        cache: 'no-store',
+        signal: abortRef.current.signal
+      })
 
-        const text = await r.text()
-        let j: any = {}
-        try { j = text ? JSON.parse(text) : {} } catch { /* ignore */ }
+      const text = await r.text()
+      let j: any = {}
+      try { j = text ? JSON.parse(text) : {} } catch { /* ignore */ }
 
-        if (!r.ok) {
-          setRows([])
-          setTotal(0)
-          const msg = j?.error ? `${j.error}${j.detail ? ' - ' + j.detail : ''}` : `HTTP ${r.status}`
-          setError(msg || 'Error')
-          return
-        }
+      if (!r.ok) {
+        setRows([])
+        setTotal(0)
+        const msg = j?.error ? `${j.error}${j.detail ? ' - ' + j.detail : ''}` : `HTTP ${r.status}`
+        setError(msg || 'Error')
+        return
+      }
 
-        setRows(Array.isArray(j.items) ? j.items : [])
-        setTotal(typeof j.total === 'number' ? j.total : 0)
+      setRows(Array.isArray(j.items) ? j.items : [])
+      setTotal(typeof j.total === 'number' ? j.total : 0)
     } catch (e: any) {
       if (e?.name !== 'AbortError') setError(e?.message || 'Error de red')
     } finally {
@@ -194,9 +183,9 @@ export default function AdminUsersPage() {
     </div>
 
     {error && (
-      <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-      {error}
-      </div>
+    <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+    {error}
+    </div>
     )}
 
     <div className="overflow-auto">
@@ -215,37 +204,37 @@ export default function AdminUsersPage() {
     </thead>
     <tbody>
     {rows.length === 0 && (
-      <tr>
-      <td colSpan={8} className="py-8 text-center text-slate-500">
-      {loading ? 'Cargando…' : 'Sin resultados.'}
-      </td>
-      </tr>
+    <tr>
+    <td colSpan={8} className="py-8 text-center text-slate-500">
+    {loading ? 'Cargando…' : 'Sin resultados.'}
+    </td>
+    </tr>
     )}
     {rows.map((r, idx) => {
-      const currentRole: Role = (r.account_type as Role) || 'student'
+    const currentRole: Role = (r.account_type as Role) || 'student'
     return (
-      <tr key={r.id} className="border-b">
-      <td className="py-2 pr-4">{r.full_name || '-'}</td>
-      <td className="py-2 pr-4">{r.rut || '-'}</td>
-      <td className="py-2 pr-4">{r.email || '-'}</td>
-      <td className="py-2 pr-4">{r.company_name || '-'}</td>
-      <td className="py-2 pr-4">
-      <select
-      className="rounded border px-2 py-1"
-      value={currentRole}
-      onChange={(e) => handleRoleChange(idx, e.target.value as Role)}
-      >
-      {(['student','instructor','company','admin'] as Role[]).map(role => (
-        <option key={role} value={role}>{ROLE_LABEL[role]}</option>
-      ))}
-      </select>
-      </td>
-      <td className="py-2 pr-4">{r.phone || '-'}</td>
-      <td className="py-2 pr-4">{r.updated_at ? new Date(r.updated_at).toLocaleString() : '-'}</td>
-      <td className="py-2 pr-4">
-      <div className="text-slate-400">—</div>
-      </td>
-      </tr>
+    <tr key={r.id} className="border-b">
+    <td className="py-2 pr-4">{r.full_name || '-'}</td>
+    <td className="py-2 pr-4">{r.rut || '-'}</td>
+    <td className="py-2 pr-4">{r.email || '-'}</td>
+    <td className="py-2 pr-4">{r.company_name || '-'}</td>
+    <td className="py-2 pr-4">
+    <select
+    className="rounded border px-2 py-1"
+    value={currentRole}
+    onChange={(e) => handleRoleChange(idx, e.target.value as Role)}
+    >
+    {(['student','instructor','company','admin'] as Role[]).map(role => (
+    <option key={role} value={role}>{ROLE_LABEL[role]}</option>
+    ))}
+    </select>
+    </td>
+    <td className="py-2 pr-4">{r.phone || '-'}</td>
+    <td className="py-2 pr-4">{r.updated_at ? new Date(r.updated_at).toLocaleString() : '-'}</td>
+    <td className="py-2 pr-4">
+    <div className="text-slate-400">—</div>
+    </td>
+    </tr>
     )
     })}
     </tbody>
@@ -271,12 +260,5 @@ export default function AdminUsersPage() {
     <div className="ml-auto text-slate-600">Total: {total}</div>
     </div>
     </main>
-  )
+    )
 }
-TS
-
-git add app/admin/users/page.tsx
-git commit -m "feat(admin): dropdown para cambiar rol con actualización instantánea"
-git push origin "$BRANCH"
-
-echo "✅ Listo. Revisa el deploy en Vercel para la rama: $BRANCH"
