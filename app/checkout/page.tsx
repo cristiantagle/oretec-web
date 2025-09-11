@@ -2,7 +2,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams, useRouter, Link } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 type APICourse = Record<string, any>
 
@@ -191,3 +191,4 @@ export default function CheckoutPage() {
     </main>
   )
 }
+import Link from 'next/link'
