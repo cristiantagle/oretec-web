@@ -4,7 +4,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { supabaseBrowser } from '@/lib/supabase/browser'
 import FadeIn from '@/components/FadeIn'
+import { supabaseBrowser } from '@/lib/supabase/browser'
 
 type APICourse = Record<string, any>
 
@@ -65,7 +67,8 @@ export default function CourseDetailPage() {
   const decoded = useMemo(() => decodeParticipantsParam(participantsParam), [participantsParam])
 
   const [courses, setCourses] = useState<APICourse[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]
+    const [isCompany, setIsCompany] = useState(false) = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -246,4 +249,5 @@ export default function CourseDetailPage() {
       </FadeIn>
     </main>
   )
-}
+import FadeIn from '@/components/FadeIn'
+import { supabaseBrowser } from '@/lib/supabase/browser'

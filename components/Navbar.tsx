@@ -263,6 +263,17 @@ export default function Navbar() {
                 </Link>
                 <Link
                 href="/dashboard/profile"
+                {/* Compra empresa (móvil) */}
+                {profile.account_type === 'company' && (
+                  <Link
+                    href="/dashboard/company/participants"
+                    prefetch={false}
+                    className="rounded px-2 py-1 text-sm hover:bg-white"
+                    onClick={() => setOpen(false)}
+                  >
+                    Compra Empresa
+                  </Link>
+                )}
                 onClick={() => setMenuOpen(false)}
                 className="block px-3 py-2 text-sm hover:bg-slate-50"
                 role="menuitem"
