@@ -32,14 +32,15 @@ echo "📂 Confirmando cambios y preparando para la integración..."
 git add .
 git commit -m "fix: corregir errores en los componentes y archivos del flujo de cursos y empresa"
 
-# Creando la rama de preview desde feat/company-entrypoints-20250911-002916
-echo "👉 Creando rama de preview desde feat/company-entrypoints-20250911-002916..."
-git checkout -b preview/company-entrypoints-20250911-002916
+# Creando una nueva rama de preview desde feat/company-entrypoints-20250911-002916
+new_branch="preview/company-entrypoints-20250911-002916-$(date +%Y%m%d%H%M%S)"
+echo "👉 Creando nueva rama de preview desde feat/company-entrypoints-20250911-002916..."
+git checkout -b "$new_branch"
 
-# Subir cambios a la rama preview
-echo "👉 Subiendo los cambios a la rama de preview..."
-git push origin preview/company-entrypoints-20250911-002916
+# Subir cambios a la nueva rama de preview
+echo "👉 Subiendo los cambios a la nueva rama de preview..."
+git push origin "$new_branch"
 
 # Finalización del proceso
-echo "🛠 Todo listo para la integración en la rama de preview. Verifica los cambios en el preview de la web."
+echo "🛠 Todo listo para la integración en la nueva rama de preview. Verifica los cambios en el preview de la web."
 echo "🎉 Proceso completado con éxito."
