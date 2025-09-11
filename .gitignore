@@ -7,7 +7,7 @@ yarn-error.log*
 .next
 .out
 dist
-
+run.sh
 # Env files (no subir nunca claves reales)
 .env
 .env.*
