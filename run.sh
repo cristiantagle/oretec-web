@@ -1,80 +1,43 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
 
-# Rama base = rama actual; si quieres otra, pásala como arg:  bash run.sh feat/...
-BASE_BRANCH="${1:-$(git rev-parse --abbrev-ref HEAD)}"
-FIX_BRANCH="hotfix/next-link-import-$(date +%Y%m%d-%H%M%S)"
+# Verifica la rama actual y las actualizaciones
+echo "📂 Verificando rama actual..."
+git status
 
-echo "👉 Usando rama base: $BASE_BRANCH"
-git fetch origin "$BASE_BRANCH" >/dev/null 2>&1 || true
-git checkout "$BASE_BRANCH" >/dev/null
-git pull --ff-only || true
-
-echo "👉 Creando rama $FIX_BRANCH desde $BASE_BRANCH…"
-git checkout -b "$FIX_BRANCH" >/dev/null
-
-# Buscar archivos .tsx/.ts/.jsx/.js que importen Link desde next/navigation
-mapfile -t FILES < <(grep -RIl --include='*.tsx' --include='*.ts' --include='*.jsx' --include='*.js' "from 'next/navigation'" | xargs -I{} grep -l "{" {} | xargs -I{} grep -l "Link" {} || true)
-
-if [ "${#FILES[@]}" -eq 0 ]; then
-  echo "ℹ No encontré imports con Link desde next/navigation. Nada que cambiar."
-  exit 0
-fi
-
-echo "🔎 Archivos a corregir:"
-printf ' - %s\n' "${FILES[@]}"
-
-fix_file () {
-  local f="$1"
-  local tmp
-  tmp="$(mktemp)"
-
-  awk '
-    BEGIN { fixed=0; hasLinkImport=0; }
-    {
-      # Detecta import desde next/navigation que incluye Link en las llaves
-      if ($0 ~ /from[[:space:]]*'\''next\/navigation'\''/ && $0 ~ /{[^}]*Link[^}]*}/) {
-        line=$0
-        # Quita el identificador Link de las llaves (con o sin coma)
-        gsub(/,\s*Link(\s*,)?/,"",line)
-        gsub(/\{\s*Link\s*,/,"{ ",line)
-        gsub(/\{\s*Link\s*\}/,"{}",line)  # por si queda solo
-        # Limpieza de comas colgantes
-        gsub(/\{\s*,\s*/,"{ ",line)
-        gsub(/,\s*\}/," }",line)
-        print line
-        fixed=1
-      } else {
-        print
-      }
-      if ($0 ~ /from[[:space:]]*'\''next\/link'\''/) hasLinkImport=1
-    }
-    END {
-      if (fixed && !hasLinkImport) {
-        print "import Link from '\''next/link'\''"
-      }
-    }
-  ' "$f" > "$tmp"
-
-  # Si no hubo cambios reales, no sobrescribas
-  if ! diff -q "$f" "$tmp" >/dev/null 2>&1; then
-    mv "$tmp" "$f"
-    echo "✔ Corregido: $f"
-  else
-    rm -f "$tmp"
-  fi
-}
-
-for f in "${FILES[@]}"; do
-  fix_file "$f"
-done
-
-# Agregar y commitear si hay cambios
-if ! git diff --quiet; then
-  git add -A
-  git commit -m "fix(next): importar Link desde next/link en vez de next/navigation (autofix repo-wide)"
-  git push -u origin "$FIX_BRANCH"
-  echo "✅ Listo. Subido $FIX_BRANCH. Vercel hará el preview."
+# Verifica si estamos en la rama correcta
+if [ "$(git rev-parse --abbrev-ref HEAD)" != "feat/company-entrypoints-20250911-002916" ]; then
+  echo "⚠️ No estás en la rama feat/company-entrypoints-20250911-002916, cambiando a ella..."
+  git checkout feat/company-entrypoints-20250911-002916
 else
-  echo "ℹ No hubo cambios que commitear."
+  echo "✔️ Estás en la rama correcta: feat/company-entrypoints-20250911-002916"
 fi
+
+# Asegúrate de que todo esté actualizado
+echo "👉 Actualizando rama feat/company-entrypoints-20250911-002916..."
+git pull origin feat/company-entrypoints-20250911-002916
+
+# Corrige archivos
+echo "📝 Corrigiendo app/courses/[slug]/page.tsx..."
+sed -i 's/const [courses, setCourses] = useState<APICourse[]>([])\nconst [loading, setLoading]\n    const [isCompany, setIsCompany] = useState(false) = useState(true)\nconst [error, setError] = useState<string | null>(null)/const [courses, setCourses] = useState<APICourse[]>([])\nconst [loading, setLoading] = useState(true)\nconst [isCompany, setIsCompany] = useState(false)\nconst [error, setError] = useState<string | null>(null)/g' app/courses/[slug]/page.tsx
+
+# Restaurar Navbar
+echo "📝 Restaurando componentes/Navbar.tsx..."
+git checkout -- app/components/Navbar.tsx
+
+# Confirmar los cambios
+echo "📂 Confirmando cambios y preparando para la integración..."
+git add .
+git commit -m "fix: corregir errores en los componentes y archivos del flujo de cursos y empresa"
+
+# Crear la rama de preview
+echo "👉 Creando rama de preview desde feat/company-entrypoints-20250911-002916..."
+git checkout -b preview/company-entrypoints-20250911-002916
+
+# Subir a la rama de preview
+echo "👉 Subiendo los cambios a la rama de preview..."
+git push origin preview/company-entrypoints-20250911-002916
+
+echo "🛠 Todo listo para la integración en la rama de preview. Verifica los cambios en el preview de la web."
+
+# Finalización
+echo "🎉 Proceso completado con éxito."

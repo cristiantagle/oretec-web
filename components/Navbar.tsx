@@ -1,6 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable @next/next/no-img-element */
 "use client"
 
 import Link from 'next/link'
@@ -22,44 +19,43 @@ type Profile = {
 
 const links = [
     { href: '/', label: 'Inicio' },
-{ href: '/courses', label: 'Cursos' },
-{ href: '/contact', label: 'Contacto' },
+    { href: '/courses', label: 'Cursos' },
+    { href: '/contact', label: 'Contacto' },
 ]
 
-// ===== Icons por rol =====
 function StudentBadgeIcon() {
     return (
         <svg viewBox="0 0 24 24" className="h-5 w-5 text-blue-900/80">
-        <rect x="3" y="4" width="18" height="16" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
-        <rect x="6" y="7" width="6" height="6" rx="3" className="fill-blue-200/60"/>
-        <rect x="6" y="15" width="12" height="2.5" rx="1.25" className="fill-blue-200/60"/>
+            <rect x="3" y="4" width="18" height="16" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
+            <rect x="6" y="7" width="6" height="6" rx="3" className="fill-blue-200/60"/>
+            <rect x="6" y="15" width="12" height="2.5" rx="1.25" className="fill-blue-200/60"/>
         </svg>
     )
 }
 function CompanyBadgeIcon() {
     return (
         <svg viewBox="0 0 24 24" className="h-5 w-5 text-blue-900/80">
-        <rect x="3" y="5" width="18" height="14" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
-        <rect x="6" y="8" width="3" height="3" className="fill-blue-200/70"/>
-        <rect x="11" y="8" width="3" height="3" className="fill-blue-200/70"/>
-        <rect x="16" y="8" width="3" height="3" className="fill-blue-200/70"/>
+            <rect x="3" y="5" width="18" height="14" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
+            <rect x="6" y="8" width="3" height="3" className="fill-blue-200/70"/>
+            <rect x="11" y="8" width="3" height="3" className="fill-blue-200/70"/>
+            <rect x="16" y="8" width="3" height="3" className="fill-blue-200/70"/>
         </svg>
     )
 }
 function InstructorBadgeIcon() {
     return (
         <svg viewBox="0 0 24 24" className="h-5 w-5 text-blue-900/80">
-        <rect x="3" y="4" width="18" height="14" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
-        <rect x="6" y="7" width="12" height="2" className="fill-blue-200/70"/>
-        <rect x="6" y="11" width="9" height="2" className="fill-blue-200/70"/>
+            <rect x="3" y="4" width="18" height="14" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
+            <rect x="6" y="7" width="12" height="2" className="fill-blue-200/70"/>
+            <rect x="6" y="11" width="9" height="2" className="fill-blue-200/70"/>
         </svg>
     )
 }
 function AdminBadgeIcon() {
     return (
         <svg viewBox="0 0 24 24" className="h-5 w-5 text-blue-900/80">
-        <circle cx="12" cy="12" r="9" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
-        <path d="M12 7v10M7 12h10" className="stroke-blue-900/60" strokeWidth="1.5" strokeLinecap="round"/>
+            <circle cx="12" cy="12" r="9" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
+            <path d="M12 7v10M7 12h10" className="stroke-blue-900/60" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
     )
 }
@@ -75,8 +71,8 @@ function IconByAccountType({ at }: { at: AccountType | null | undefined }) {
 
 function firstNameFrom(fullName: string | null | undefined, email: string | null | undefined) {
     if (fullName && fullName.trim().length) return fullName.trim().split(/\s+/)[0]
-        if (email && email.includes('@')) return email.split('@')[0]
-            return 'Usuario'
+    if (email && email.includes('@')) return email.split('@')[0]
+    return 'Usuario'
 }
 
 export default function Navbar() {
@@ -115,32 +111,32 @@ export default function Navbar() {
                 }
                 if (mounted) setToken(t)
 
-                    const r = await fetch('/api/profile/get', {
-                        headers: { Authorization: `Bearer ${t}` },
-                        cache: 'no-store',
-                    })
-                    if (!r.ok) {
-                        if (mounted) setProfile(null)
-                            return
-                    }
-                    const j = await r.json()
-                    const at = String(j.account_type ?? 'student').toLowerCase() as AccountType
-                    const normAt: AccountType =
+                const r = await fetch('/api/profile/get', {
+                    headers: { Authorization: `Bearer ${t}` },
+                    cache: 'no-store',
+                })
+                if (!r.ok) {
+                    if (mounted) setProfile(null)
+                    return
+                }
+                const j = await r.json()
+                const at = String(j.account_type ?? 'student').toLowerCase() as AccountType
+                const normAt: AccountType =
                     at === 'admin' || at === 'instructor' || at === 'company' || at === 'student'
-                    ? at
-                    : 'student'
-        if (mounted) {
-            setProfile({
-                id: j.id,
-                email: j.email ?? null,
-                full_name: j.full_name ?? null,
-                account_type: normAt,
-                company_name: j.company_name ?? null,
-                phone: j.phone ?? null,
-                avatar_url: j.avatar_url ?? null,
-                updated_at: j.updated_at ?? null,
-            })
-        }
+                        ? at
+                        : 'student'
+                if (mounted) {
+                    setProfile({
+                        id: j.id,
+                        email: j.email ?? null,
+                        full_name: j.full_name ?? null,
+                        account_type: normAt,
+                        company_name: j.company_name ?? null,
+                        phone: j.phone ?? null,
+                        avatar_url: j.avatar_url ?? null,
+                        updated_at: j.updated_at ?? null,
+                    })
+                }
             } finally {
                 if (mounted) setLoadingUser(false)
             }
@@ -263,17 +259,6 @@ export default function Navbar() {
                 </Link>
                 <Link
                 href="/dashboard/profile"
-                {/* Compra empresa (móvil) */}
-                {profile.account_type === 'company' && (
-                  <Link
-                    href="/dashboard/company/participants"
-                    prefetch={false}
-                    className="rounded px-2 py-1 text-sm hover:bg-white"
-                    onClick={() => setOpen(false)}
-                  >
-                    Compra Empresa
-                  </Link>
-                )}
                 onClick={() => setMenuOpen(false)}
                 className="block px-3 py-2 text-sm hover:bg-slate-50"
                 role="menuitem"
