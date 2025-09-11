@@ -21,6 +21,7 @@ const poppins = Poppins({
 })
 
 import PreviewBadge from '@/components/PreviewBadge';
+import AdminFloatingButton from '@/components/AdminFloatingButton';
 export const metadata = {
   title: 'OreTec',
   description: 'Formación en Prevención y Seguridad Laboral',
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <Footer />
     <ScrollTop />
       <PreviewBadge />
+      <AdminFloatingButton />
     </body>
     </html>
   )
