@@ -37,6 +37,7 @@ git checkout -b preview/company-entrypoints-20250911-002916
 echo "👉 Subiendo los cambios a la rama de preview..."
 git push origin preview/company-entrypoints-20250911-002916
 
+# Finalización del proceso
 echo "🛠 Todo listo para la integración en la rama de preview. Verifica los cambios en el preview de la web."
 
 # Fin del proceso
