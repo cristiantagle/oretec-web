@@ -68,7 +68,7 @@ export default function CourseDetailPage() {
 
   const [courses, setCourses] = useState<APICourse[]>([])
   const [loading, setLoading]
-    const [isCompany, setIsCompany] = useState(false) = useState(true)
+    const [isCompany, setIsCompany] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
