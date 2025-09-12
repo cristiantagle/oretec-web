@@ -82,6 +82,21 @@ function firstNameFrom(fullName: string | null | undefined, email: string | null
 export default function Navbar() {
     const pathname = usePathname()
     const router = useRouter()
+
+  // === Auto-refresh post auth (Navbar) ===
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && sessionStorage.getItem('needs-navbar-refresh') === '1') {
+        sessionStorage.removeItem('needs-navbar-refresh');
+        router.refresh();
+      }
+    } catch {}
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, _session) => {
+      try { router.refresh(); } catch {}
+    });
+    return () => { try { sub?.subscription?.unsubscribe?.(); } catch {} };
+  }, [supabase, router]);
+  // === Fin auto-refresh ===
     const [open, setOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
 
@@ -221,7 +236,7 @@ export default function Navbar() {
 
         {/* Si hay sesión: User menu */}
         {profile && (
-            <div className="relative">
+            <div key={(profile?.email)||"anon"} className="relative">
             <button
             onClick={() => setMenuOpen((v) => !v)}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-900 px-3 py-1.5 text-white shadow hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
