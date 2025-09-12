@@ -28,7 +28,23 @@ const links = [
 
 // ===== Icons por rol =====
 function StudentBadgeIcon() {
-    return (
+
+  // === Auto-refresh post auth (evita necesidad de F5) ===
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && sessionStorage.getItem('needs-navbar-refresh') === '1') {
+        sessionStorage.removeItem('needs-navbar-refresh');
+        router.refresh();
+      }
+    } catch {}
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, _session) => {
+      try { router.refresh(); } catch {}
+    });
+    return () => { try { sub?.subscription?.unsubscribe?.(); } catch {} };
+  }, [supabase, router]);
+  // === Fin auto-refresh ===
+
+  return (
         <svg viewBox="0 0 24 24" className="h-5 w-5 text-blue-900/80">
         <rect x="3" y="4" width="18" height="16" rx="2" className="fill-blue-50 stroke-blue-900/40" strokeWidth="1.5"/>
         <rect x="6" y="7" width="6" height="6" rx="3" className="fill-blue-200/60"/>
@@ -221,7 +237,7 @@ export default function Navbar() {
 
         {/* Si hay sesión: User menu */}
         {profile && (
-            <div className="relative">
+            <div key={(profile && profile.email) || "anon"} className="relative">
             <button
             onClick={() => setMenuOpen((v) => !v)}
             className="inline-flex items-center gap-2 rounded-lg bg-blue-900 px-3 py-1.5 text-white shadow hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
