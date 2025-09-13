@@ -133,9 +133,9 @@ export default function UsersReportPanel() {
           </div>
         </div>
         <div className="rounded-xl border bg-white p-4 shadow-sm">
-          <div className="text-xs text-slate-500">Por tipo (Admin / Instructor)</div>
+          <div className="text-xs text-slate-500">Por tipo (Admin / Relator)</div>
           <div className="mt-1 text-sm text-slate-700">
-            Admin: <b>{kpi?.por_tipo?.admin ?? 0}</b> · Instructor: <b>{kpi?.por_tipo?.instructor ?? 0}</b>
+            Admin: <b>{kpi?.por_tipo?.admin ?? 0}</b> · Relator: <b>{kpi?.por_tipo?.instructor ?? 0}</b>
           </div>
         </div>
       </div>
@@ -209,7 +209,7 @@ export default function UsersReportPanel() {
                 <td className="px-3 py-2">{u.company_name || "-"}</td>
                 <td className="px-3 py-2">{u.account_type || "-"}</td>
                 <td className="px-3 py-2">{u.phone || "-"}</td>
-                <td className="px-3 py-2">{u.created_at ? new Date(u.created_at).toLocaleString() : "-"}</td>
+                <td className="px-3 py-2">{u.created_at ? new Fecha(u.created_at).toLocaleString() : "-"}</td>
               </tr>
             ))}
             {rows.length === 0 && !loading && (
