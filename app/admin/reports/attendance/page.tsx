@@ -14,9 +14,15 @@ type Row = {
   status: 'present'|'absent'|'late'
 }
 
+const STATUS_LABEL: Record<Row['status'], string> = {
+  present: 'Presente',
+  late: 'Atraso',
+  absent: 'Ausente',
+}
+
 const demoRows: Row[] = [
-  { student_name:'Ejemplo Uno', student_email:'uno@ejemplo.cl', course_title:'Curso Ejemplo', class_date:'2025-09-01', status:'present' },
-  { student_name:'Ejemplo Dos', student_email:'dos@ejemplo.cl', course_title:'Curso Ejemplo', class_date:'2025-09-01', status:'late' },
+  { student_name:'Ejemplo Uno',  student_email:'uno@ejemplo.cl',  course_title:'Curso Ejemplo', class_date:'2025-09-01', status:'present' },
+  { student_name:'Ejemplo Dos',  student_email:'dos@ejemplo.cl',  course_title:'Curso Ejemplo', class_date:'2025-09-01', status:'late' },
   { student_name:'Ejemplo Tres', student_email:'tres@ejemplo.cl', course_title:'Curso Ejemplo', class_date:'2025-09-02', status:'absent' },
 ]
 
@@ -59,12 +65,27 @@ export default function AdminAttendanceReport(){
     setRows(demoRows)
   }
 
+  // Exportar con cabeceras en español y estados traducidos
   function exportCSV(){
-    const csv = toCSV(rows, ['student_name','student_email','course_title','class_date','status'])
+    const data = rows.map(r => ({
+      Alumno: r.student_name,
+      Correo: r.student_email,
+      Curso:  r.course_title,
+      Fecha:  r.class_date,
+      Estado: STATUS_LABEL[r.status],
+    }))
+    const csv = toCSV(data, ['Alumno','Correo','Curso','Fecha','Estado'])
     downloadCSV('reporte_asistencia.csv', csv)
   }
   function exportXLS(){
-    const xls = toXLS(rows, ['student_name','student_email','course_title','class_date','status'], 'Asistencia')
+    const data = rows.map(r => ({
+      Alumno: r.student_name,
+      Correo: r.student_email,
+      Curso:  r.course_title,
+      Fecha:  r.class_date,
+      Estado: STATUS_LABEL[r.status],
+    }))
+    const xls = toXLS(data, ['Alumno','Correo','Curso','Fecha','Estado'], 'Asistencia')
     downloadXLS('reporte_asistencia.xls', xls)
   }
 
@@ -101,7 +122,7 @@ export default function AdminAttendanceReport(){
                 <td className="px-3 py-2">{r.student_email}</td>
                 <td className="px-3 py-2">{r.course_title}</td>
                 <td className="px-3 py-2">{r.class_date}</td>
-                <td className="px-3 py-2">{r.status}</td>
+                <td className="px-3 py-2">{STATUS_LABEL[r.status]}</td>
               </tr>
             ))}
           </tbody>
