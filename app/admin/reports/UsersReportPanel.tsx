@@ -209,7 +209,7 @@ export default function UsersReportPanel() {
                 <td className="px-3 py-2">{u.company_name || "-"}</td>
                 <td className="px-3 py-2">{u.account_type || "-"}</td>
                 <td className="px-3 py-2">{u.phone || "-"}</td>
-                <td className="px-3 py-2">{u.created_at ? new Fecha(u.created_at).toLocaleString() : "-"}</td>
+                <td className="px-3 py-2">{u.created_at ? new Date(u.created_at).toLocaleString() : "-"}</td>
               </tr>
             ))}
             {rows.length === 0 && !loading && (
