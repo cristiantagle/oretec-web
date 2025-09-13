@@ -86,6 +86,14 @@ export default function ReportsPage() {
 
     <p className="mb-4 text-slate-600">
     Aquí podrás acceder a distintos reportes de la plataforma.
+
+        {/* Accesos rápidos */}
+        <div className="mt-4 flex flex-wrap gap-2" aria-label="Accesos rápidos">
+          <Link href="/admin/reports/attendance" className="btn-primary">Asistencia</Link>
+          <Link href="/admin/reports/evaluations" className="btn-secondary">Evaluaciones</Link>
+          <Link href="/admin/reports/sales" className="btn-secondary">Ventas</Link>
+        </div>
+
     </p>
 
     {/* Tarjetas de selección */}
