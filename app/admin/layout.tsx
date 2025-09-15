@@ -33,6 +33,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <AdminTab href="/admin/users" label="Usuarios" pathname={pathname} />
         <AdminTab href="/admin/courses" label="Cursos" pathname={pathname} />
         <AdminTab href="/admin/reports" label="Reportes" pathname={pathname} />
+        <AdminTab href="/admin/certificates" label="Certificados" pathname={pathname} />
         </div>
         </nav>
         </header>
