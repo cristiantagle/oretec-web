@@ -6,6 +6,9 @@
   --brand: #1E3A8A;
   --gray-dark: #374151;
   --gray-light: #E5E7EB;
+  --font-sans: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'ui-sans-serif', 'system-ui', '-apple-system',
+    'BlinkMacSystemFont', 'sans-serif';
+  --font-display: 'Poppins', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
 }
 
 /* Fondo degradé corporativo suave (úsa .bg-oret-gradient donde quieras) */

@@ -38,6 +38,11 @@
   - `onAuthStateChange` está montado una sola vez.
   - Se llama a `router.refresh()` dentro de ese listener.
   - No hay caché en el fetch del perfil (`cache: 'no-store'`).
+- El proyecto ya **no descarga fuentes de Google en build**. Las familias Inter y Poppins se definen como *fallbacks* locales en `app/globals.css` y Tailwind las expone mediante `font-sans`/`font-display`. Si un deploy falla por fonts antiguas en caché, basta con limpiar el build cache desde Vercel (`Deployments → ... → Redeploy with latest`).
+- Para forzar un redeploy de la PR en Vercel:
+  1. Abrir el panel del deployment fallido.
+  2. Pulsar **Redeploy** y elegir *Redeploy with existing build cache* si no se modificó Supabase; usar *Redeploy without cache* si persisten los errores.
+  3. Esperar a que termine la fase “Creating an optimized production build…”. Si concluye sin errores, la vista previa queda lista para QA.
 
 ## Créditos
 
